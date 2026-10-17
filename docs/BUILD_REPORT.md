@@ -26,6 +26,7 @@
 | `packages/ui` (Vitest) | 20/20 pass |
 | Backend `checkout.spec.ts` (integration) | 3/3 pass |
 | Backend `vendor-isolation.spec.ts` (integration) | 2/2 pass (every vendor endpoint refuses other vendors' ids; no buyer PII in vendor responses or emails) |
+| Backend `auth-security.spec.ts` (integration) | 7/7 pass (password policy + breach check, Turnstile, lockout, staff sub-roles + MFA, CSRF with a real session cookie, webhook signatures + replay, append-only audit at DB level, rate limits) |
 | Lint / typecheck | Clean for packages, backend and both apps at last commit |
 
 ## Security findings so far
@@ -39,7 +40,7 @@
 
 ## Next steps (in order)
 
-1. Remaining backend security suites: roles/MFA, auth hardening (password, Turnstile, lockout), CSRF, webhooks, ledger/payout flows, review flow, uploads.
+1. Remaining backend suites: ledger/payout flows, review + markup flow, uploads.
 2. Storefront and vendor portal pages (resume the two agents).
 3. Admin extensions (dashboard, review queue, payouts, settings, audit, MFA screen).
 4. Catalog migration with dry run, review CSV and redirect map.
