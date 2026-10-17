@@ -1,0 +1,1 @@
+{ "extends": "@haanta/config/tsconfig/library.json", "compilerOptions": { "rootDir": "." }, "include": ["src", "test"] }

@@ -1,0 +1,11 @@
+{
+  "RateResponse": {
+    "Response": { "ResponseStatus": { "Code": "1", "Description": "Success" } },
+    "RatedShipment": [
+      { "Service": { "Code": "11" }, "TotalCharges": { "CurrencyCode": "USD", "MonetaryValue": "38.90" } },
+      { "Service": { "Code": "08" }, "TotalCharges": { "CurrencyCode": "USD", "MonetaryValue": "88.20" } },
+      { "Service": { "Code": "07" }, "TotalCharges": { "CurrencyCode": "USD", "MonetaryValue": "120.00" } },
+      { "Service": { "Code": "65" }, "TotalCharges": { "CurrencyCode": "USD", "MonetaryValue": "110.40" } }
+    ]
+  }
+}

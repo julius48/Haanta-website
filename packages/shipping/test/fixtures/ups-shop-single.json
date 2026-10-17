@@ -1,0 +1,6 @@
+{
+  "RateResponse": {
+    "Response": { "ResponseStatus": { "Code": "1" } },
+    "RatedShipment": { "Service": { "Code": "12" }, "TotalCharges": { "CurrencyCode": "USD", "MonetaryValue": "61.05" } }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@haanta/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" },
+    "./tokens.css": "./src/tokens.css",
+    "./base.css": "./src/base.css"
+  },
+  "sideEffects": ["*.css"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react",
+    "gen:css": "tsx scripts/gen-css.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": { "react": "^18.3.0 || ^19.0.0" },
+  "devDependencies": {
+    "@haanta/config": "workspace:*",
+    "@types/node": "^24.9.0",
+    "@types/react": "^19.2.0",
+    "eslint": "^9.39.5",
+    "react": "^19.2.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

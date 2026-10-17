@@ -1,0 +1,148 @@
+/* Haanta base styles. Uses only token variables from tokens.css. Mobile first. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
+  letter-spacing: var(--type-body-tracking);
+}
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+a {
+  color: var(--color-brand);
+}
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+h1,
+h2,
+h3 {
+  color: var(--color-brand);
+  font-weight: var(--type-section-header-weight);
+  line-height: var(--type-section-header-leading);
+  letter-spacing: var(--type-section-header-tracking);
+  margin: 0 0 var(--space-4);
+}
+h1 {
+  font-size: var(--type-conversational-size);
+}
+h2 {
+  font-size: var(--type-section-header-size);
+}
+.h-display {
+  font-family: var(--font-display-stack);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.h-container {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding-left: var(--layout-margin-mobile);
+  padding-right: var(--layout-margin-mobile);
+}
+@media (min-width: 1024px) {
+  .h-container {
+    padding-left: var(--layout-margin-desktop);
+    padding-right: var(--layout-margin-desktop);
+  }
+}
+.h-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.h-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.h-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.h-btn--primary {
+  background: var(--color-brand);
+  color: var(--color-text-inverse);
+}
+.h-btn--secondary {
+  background: var(--color-background);
+  color: var(--color-brand);
+  border-color: var(--color-brand);
+}
+.h-btn--ghost {
+  background: transparent;
+  color: var(--color-brand);
+}
+.h-badge {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  font-size: var(--type-small-size);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+.h-badge--sale {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+.h-badge--preorder,
+.h-badge--made-to-order {
+  background: var(--haanta-tan);
+  color: var(--haanta-brown);
+}
+.h-price__sale {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.h-price__was {
+  color: var(--color-text-muted);
+}
+.h-wordmark {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 1.5rem;
+}
+.h-wordmark--brown {
+  color: var(--haanta-brown);
+}
+.h-wordmark--tan {
+  color: var(--haanta-tan);
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
