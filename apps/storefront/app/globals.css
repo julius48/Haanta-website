@@ -1,0 +1,13 @@
+/* App-level styles. Colours come only from token variables (packages/ui). */
+.h-skip-link:focus {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  width: auto;
+  height: auto;
+  clip: auto;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  z-index: 100;
+}
