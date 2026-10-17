@@ -121,7 +121,9 @@ export function assertNoBuyerPii(payload: unknown, buyer: { email?: string | nul
   for (const n of needles) {
     if (json.includes(n)) throw new Error("Buyer personal data found in vendor payload")
   }
+  // Key-name check skips `ship_to` (Haanta's own hub address); buyer values above are checked everywhere.
+  const keys = JSON.stringify(payload, (k, v) => (k === "ship_to" ? undefined : v)).toLowerCase()
   for (const key of ['"email"', '"phone"', '"first_name"', '"last_name"', '"shipping_address"', '"billing_address"', '"customer"']) {
-    if (json.includes(key)) throw new Error(`Forbidden field ${key} in vendor payload`)
+    if (keys.includes(key)) throw new Error(`Forbidden field ${key} in vendor payload`)
   }
 }

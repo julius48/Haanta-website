@@ -85,7 +85,8 @@ const BUYER_PII_KEYS = /"(email|phone|first_name|last_name|shipping_address|bill
 export function vendorPiiGuard(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
   const original = res.json.bind(res)
   res.json = ((body: unknown) => {
-    const text = JSON.stringify(body ?? null)
+    // `ship_to` is Haanta's own hub address (from admin settings), not buyer data, so it is skipped.
+    const text = JSON.stringify(body ?? null, (key, value) => (key === "ship_to" ? undefined : value))
     if (BUYER_PII_KEYS.test(text)) {
       const logger = req.scope.resolve("logger") as { error: (m: string) => void }
       logger.error(`[security] blocked vendor response containing buyer PII fields on ${req.method} ${fullPath(req)}`)

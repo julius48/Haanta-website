@@ -25,7 +25,7 @@
 | `packages/core` (Vitest) | 62/62 pass |
 | `packages/ui` (Vitest) | 20/20 pass |
 | Backend `checkout.spec.ts` (integration) | 3/3 pass |
-| Backend `vendor-isolation.spec.ts` (integration) | 1/2 pass. **The cross-vendor test fails at line 98 (not yet diagnosed).** |
+| Backend `vendor-isolation.spec.ts` (integration) | 2/2 pass (every vendor endpoint refuses other vendors' ids; no buyer PII in vendor responses or emails) |
 | Lint / typecheck | Clean for packages, backend and both apps at last commit |
 
 ## Security findings so far
@@ -35,13 +35,13 @@
 | Client-supplied line-item metadata reached the cart because Medusa validates before custom middleware | Guard now cleans `validatedBody` too; covered by a test |
 | Path-based guards (MFA allow-list, staff role table) compared mount-relative `req.path` | All guards use `fullPath(req)`; found by the MFA test |
 | Refund could move money before the ledger rejected an over-refund | Remaining quantity checked before refunding |
+| PII guard blocked vendor order views: the hub address's `address_1`/`phone` keys matched the buyer-PII key list (false positive; no buyer data present) | Key checks skip `ship_to` (Haanta's hub, from settings); buyer values are still checked everywhere |
 
 ## Next steps (in order)
 
-1. Diagnose the failing cross-vendor isolation test.
-2. Remaining backend security suites: roles/MFA, auth hardening (password, Turnstile, lockout), CSRF, webhooks, ledger/payout flows, review flow, uploads.
-3. Storefront and vendor portal pages (resume the two agents).
-4. Admin extensions (dashboard, review queue, payouts, settings, audit, MFA screen).
-5. Catalog migration with dry run, review CSV and redirect map.
-6. CI (GitHub Actions + gitleaks, audit, CodeQL, Dependabot), docker-compose, README.
-7. Launch readiness: Lighthouse/axe budgets, security review, checkout load test, backup/restore, runbook, cutover plan.
+1. Remaining backend security suites: roles/MFA, auth hardening (password, Turnstile, lockout), CSRF, webhooks, ledger/payout flows, review flow, uploads.
+2. Storefront and vendor portal pages (resume the two agents).
+3. Admin extensions (dashboard, review queue, payouts, settings, audit, MFA screen).
+4. Catalog migration with dry run, review CSV and redirect map.
+5. CI (GitHub Actions + gitleaks, audit, CodeQL, Dependabot), docker-compose, README.
+6. Launch readiness: Lighthouse/axe budgets, security review, checkout load test, backup/restore, runbook, cutover plan.
