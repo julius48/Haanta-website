@@ -1,0 +1,57 @@
+{
+  "name": "@haanta/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Haanta commerce backend and admin dashboard (Medusa v2)",
+  "scripts": {
+    "build": "medusa build",
+    "dev": "medusa develop",
+    "start": "medusa start",
+    "seed": "medusa exec ./src/scripts/seed.ts",
+    "migrate": "medusa db:migrate",
+    "import:catalog": "medusa exec ./src/scripts/import-catalog.ts",
+    "lint": "eslint src integration-tests",
+    "typecheck": "tsc --noEmit",
+    "test": "cross-env TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
+    "test:integration": "cross-env TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit"
+  },
+  "dependencies": {
+    "@haanta/core": "workspace:*",
+    "@haanta/pricing": "workspace:*",
+    "@haanta/shipping": "workspace:*",
+    "@medusajs/admin-sdk": "2.21.2",
+    "@medusajs/cli": "2.21.2",
+    "@medusajs/framework": "2.21.2",
+    "@medusajs/icons": "2.21.2",
+    "@medusajs/medusa": "2.21.2",
+    "@medusajs/ui": "^4.2.6",
+    "@tanstack/react-query": "5.64.2",
+    "ioredis": "^5.6.1",
+    "pdfkit": "^0.17.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "stripe": "^19.1.0",
+    "zod": "^4.2.0",
+    "sanitize-html": "^2.17.0"
+  },
+  "devDependencies": {
+    "@haanta/config": "workspace:*",
+    "@medusajs/test-utils": "2.21.2",
+    "@swc/core": "^1.13.5",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.9.0",
+    "@types/pdfkit": "^0.17.3",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.5",
+    "jest": "^29.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3",
+    "vite": "^5.4.21"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
