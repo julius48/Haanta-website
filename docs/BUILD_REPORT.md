@@ -27,7 +27,8 @@
 | Backend `checkout.spec.ts` (integration) | 3/3 pass |
 | Backend `vendor-isolation.spec.ts` (integration) | 2/2 pass (every vendor endpoint refuses other vendors' ids; no buyer PII in vendor responses or emails) |
 | Backend `auth-security.spec.ts` (integration) | 7/7 pass (password policy + breach check, Turnstile, lockout, staff sub-roles + MFA, CSRF with a real session cookie, webhook signatures + replay, append-only audit at DB level, rate limits) |
-| Lint / typecheck | Clean for packages, backend and both apps at last commit |
+| Backend `money-flows.spec.ts` (integration) | 3/3 pass (review queue + live edits stay live until approved; finance markup → reprice → review + audit; delivery → payable → payout → PDF/CSV statement; full refund, partial return after payout, double-refund blocked, reconciliation) |
+| Lint / typecheck | Clean for packages and backend (153 backend files, 0 lint errors); apps clean at scaffold commit |
 
 ## Security findings so far
 
@@ -40,7 +41,7 @@
 
 ## Next steps (in order)
 
-1. Remaining backend suites: ledger/payout flows, review + markup flow, uploads.
+1. Upload signing integration test.
 2. Storefront and vendor portal pages (resume the two agents).
 3. Admin extensions (dashboard, review queue, payouts, settings, audit, MFA screen).
 4. Catalog migration with dry run, review CSV and redirect map.

@@ -101,6 +101,7 @@ export const storeHeaders = (w: World, extra: Record<string, string> = {}) => ({
 
 /** Create a staff user with a role, sign in, enrol TOTP and verify. Returns auth headers. */
 export async function staffLogin(api: Api, container: MedusaContainer, role: StaffRole | null, email = `${role ?? "norole"}@haanta.test`) {
+  resetCounterStoreForTest() // each simulated person signs in from their own IP
   const users = container.resolve<IUserModuleService>(Modules.USER)
   const auth = container.resolve<IAuthModuleService>(Modules.AUTH)
   const [existing] = await users.listUsers({ email })
@@ -129,6 +130,7 @@ async function hashPassword(password: string): Promise<string> {
 
 /** Full vendor sign-up through the API: register, apply, verify email, enrol TOTP. */
 export async function vendorSignup(api: Api, container: MedusaContainer, email: string, business: string, opts: { approve?: boolean } = {}) {
+  resetCounterStoreForTest() // each simulated person signs in from their own IP
   const reg = await must("vendor register", api.post("/auth/vendor/emailpass/register", { email, password: PASSWORD }, { headers: TURNSTILE }))
   const regHeaders = { authorization: `Bearer ${reg.data.token}` }
   const app = await must("vendor application", api.post("/vendor/applications", { business_name: business, contact_name: "Test Owner", origin_country: "NG" }, { headers: regHeaders }))
