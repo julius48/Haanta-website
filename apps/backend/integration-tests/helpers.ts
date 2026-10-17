@@ -19,6 +19,16 @@ export type Api = {
 export const PASSWORD = "correct-horse-battery-staple-42"
 export const TURNSTILE = { "x-turnstile-token": "test-pass" }
 
+/** Await a request; on HTTP errors throw with the step name, status and body (easier debugging). */
+export async function must<T = any>(label: string, p: Promise<{ status: number; data: T }>): Promise<{ status: number; data: T }> {
+  try {
+    return await p
+  } catch (e: any) {
+    if (e.response) throw new Error(`${label} failed: ${e.response.status} ${JSON.stringify(e.response.data)}`)
+    throw e
+  }
+}
+
 /** Run a request and return the response even for 4xx/5xx (axios throws on errors). */
 export async function call<T = any>(p: Promise<{ status: number; data: T }>): Promise<{ status: number; data: T }> {
   try {
@@ -111,23 +121,24 @@ export async function staffLogin(api: Api, container: MedusaContainer, role: Sta
 
 /** Medusa's emailpass provider hashes with scrypt-kdf; reuse it so test users can sign in. */
 async function hashPassword(password: string): Promise<string> {
-  const scrypt = (await import("scrypt-kdf")) as unknown as { kdf: (p: string, o: { logN: number; r: number; p: number }) => Promise<Buffer> }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const scrypt = require("scrypt-kdf") as { kdf: (p: string, o: { logN: number; r: number; p: number }) => Promise<Buffer> }
   const buf = await scrypt.kdf(password, { logN: 15, r: 8, p: 1 })
   return buf.toString("base64")
 }
 
 /** Full vendor sign-up through the API: register, apply, verify email, enrol TOTP. */
 export async function vendorSignup(api: Api, container: MedusaContainer, email: string, business: string, opts: { approve?: boolean } = {}) {
-  const reg = await api.post("/auth/vendor/emailpass/register", { email, password: PASSWORD }, { headers: TURNSTILE })
+  const reg = await must("vendor register", api.post("/auth/vendor/emailpass/register", { email, password: PASSWORD }, { headers: TURNSTILE }))
   const regHeaders = { authorization: `Bearer ${reg.data.token}` }
-  const app = await api.post("/vendor/applications", { business_name: business, contact_name: "Test Owner", origin_country: "NG" }, { headers: regHeaders })
-  const login = await api.post("/auth/vendor/emailpass", { email, password: PASSWORD }, { headers: TURNSTILE })
+  const app = await must("vendor application", api.post("/vendor/applications", { business_name: business, contact_name: "Test Owner", origin_country: "NG" }, { headers: regHeaders }))
+  const login = await must("vendor login", api.post("/auth/vendor/emailpass", { email, password: PASSWORD }, { headers: TURNSTILE }))
   const headers = { authorization: `Bearer ${login.data.token}` }
-  const setup = await api.post("/vendor/mfa/setup", {}, { headers })
-  await api.post("/vendor/mfa/confirm", { code: totp(setup.data.secret) }, { headers })
+  const setup = await must("vendor mfa setup", api.post("/vendor/mfa/setup", {}, { headers }))
+  await must("vendor mfa confirm", api.post("/vendor/mfa/confirm", { code: totp(setup.data.secret) }, { headers }))
   const mail = [...outbox].reverse().find((m) => m.event === "Vendor Verify Email" && m.to.email === email)
   const token = new URL(String(mail!.properties.verify_url)).searchParams.get("token")!
-  await api.post("/vendor/verify-email", { token }, { headers })
+  await must("vendor verify email", api.post("/vendor/verify-email", { token }, { headers }))
   const vendorId = app.data.vendor.id as string
   if (opts.approve !== false) {
     await container.resolve<MarketplaceService>(MARKETPLACE_MODULE).updateVendors({ id: vendorId, status: "active" })

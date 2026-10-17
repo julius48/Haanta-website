@@ -32,6 +32,14 @@ export async function audit(
   await service.record({ actor_type: input.actor_type ?? actor.type, actor_id: input.actor_id ?? actor.id, ip: clientIp(req), ...input })
 }
 
+/**
+ * Full request path without the query string. Use this (never req.path) for security decisions:
+ * Medusa mounts middlewares at their matcher, so req.path is relative to the mount point.
+ */
+export function fullPath(req: MedusaRequest): string {
+  return (req.originalUrl || req.url || "").split("?")[0]!.replace(/\/+$/, "") || "/"
+}
+
 export function bearerToken(req: MedusaRequest): string | null {
   const h = req.headers.authorization
   if (!h || !/^Bearer\s+/i.test(h)) return null

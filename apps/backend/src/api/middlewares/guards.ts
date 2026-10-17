@@ -3,7 +3,7 @@ import { MARKETPLACE_MODULE, type MarketplaceService } from "../../modules/marke
 import { SECURITY_MODULE, type SecurityService } from "../../modules/security"
 import { isAllowed, isBootstrapPath } from "../../lib/rbac"
 import { isLoginVerified } from "../../lib/mfa"
-import { audit, type AnyRequest } from "../../lib/http"
+import { audit, fullPath, type AnyRequest } from "../../lib/http"
 import { redact } from "@haanta/core"
 
 const deny = (res: MedusaResponse, status: number, code: string, message: string) => res.status(status).json({ type: "not_allowed", code, message })
@@ -17,14 +17,15 @@ const ADMIN_PUBLIC = ["/admin/invites/accept"]
  */
 export async function staffGuard(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
   const r = req as AnyRequest
-  if (ADMIN_PUBLIC.some((p) => req.path.startsWith(p))) return next()
+  const path = fullPath(req)
+  if (ADMIN_PUBLIC.some((p) => path.startsWith(p))) return next()
   const ctx = r.auth_context
   if (!ctx?.actor_id || ctx.actor_type !== "user") return deny(res, 401, "unauthorized", "Sign in required")
   const role = await req.scope.resolve<SecurityService>(SECURITY_MODULE).getRole(ctx.actor_id)
   if (!role) return deny(res, 403, "no_staff_role", "Your account has no Haanta staff role")
   r.staffRole = role
-  if (!isAllowed(role, req.method, req.path)) return deny(res, 403, "forbidden_role", "Your role does not allow this action")
-  if (!isBootstrapPath(req.method, req.path) && !(await isLoginVerified(req, "user", ctx.actor_id))) {
+  if (!isAllowed(role, req.method, path)) return deny(res, 403, "forbidden_role", "Your role does not allow this action")
+  if (!isBootstrapPath(req.method, path) && !(await isLoginVerified(req, "user", ctx.actor_id))) {
     return deny(res, 403, "mfa_required", "Verify with your authenticator app to continue")
   }
   next()
@@ -55,7 +56,7 @@ export async function vendorGuard(req: MedusaRequest, res: MedusaResponse, next:
     vendor_status: user.vendor.status as "pending" | "active" | "paused" | "rejected",
     email_verified: !!user.email_verified_at,
   }
-  const path = req.path
+  const path = fullPath(req)
   const starts = (list: string[]) => list.some((p) => path === p || path.startsWith(`${p}/`))
   if (!starts(VENDOR_PRE_MFA) && !(await isLoginVerified(req, "vendor", user.id))) {
     return deny(res, 403, "mfa_required", "Verify with your authenticator app to continue")
@@ -87,7 +88,7 @@ export function vendorPiiGuard(req: MedusaRequest, res: MedusaResponse, next: Me
     const text = JSON.stringify(body ?? null)
     if (BUYER_PII_KEYS.test(text)) {
       const logger = req.scope.resolve("logger") as { error: (m: string) => void }
-      logger.error(`[security] blocked vendor response containing buyer PII fields on ${req.method} ${req.path}`)
+      logger.error(`[security] blocked vendor response containing buyer PII fields on ${req.method} ${fullPath(req)}`)
       res.status(500)
       return original({ type: "unexpected_state", message: "Response blocked" })
     }
@@ -105,7 +106,7 @@ export function auditMutations(req: MedusaRequest, res: MedusaResponse, next: Me
     void audit(r, {
       action: `http.${req.method}`,
       entity_type: "route",
-      entity_id: req.originalUrl?.split("?")[0] ?? req.path,
+      entity_id: fullPath(req),
       after: { body: redact(req.body ?? null), status: res.statusCode, vendor_id: r.vendorContext?.vendor_id ?? null },
     }).catch(() => undefined)
   })

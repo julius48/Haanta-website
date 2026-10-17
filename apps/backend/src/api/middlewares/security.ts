@@ -1,7 +1,7 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { hitRateLimit, isAllowedOrigin, redact, securityHeaders, type RateLimitRule } from "@haanta/core"
 import { getCounterStore } from "../../lib/counter-store"
-import { clientIp } from "../../lib/http"
+import { clientIp, fullPath } from "../../lib/http"
 
 const isProd = process.env.NODE_ENV === "production"
 
@@ -53,7 +53,7 @@ export function requestLogger(req: MedusaRequest, res: MedusaResponse, next: Med
     res.on("finish", () => {
       if (res.statusCode >= 500) {
         const logger = req.scope.resolve("logger") as { error: (m: string) => void }
-        logger.error(`[http] ${req.method} ${req.path} ${res.statusCode} ${Date.now() - started}ms ${JSON.stringify(redact({ query: req.query }))}`)
+        logger.error(`[http] ${req.method} ${fullPath(req)} ${res.statusCode} ${Date.now() - started}ms ${JSON.stringify(redact({ query: req.query }))}`)
       }
     })
   }

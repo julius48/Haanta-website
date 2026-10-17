@@ -11,7 +11,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { createLockout, PASSWORD_PROBLEM_MESSAGES, validatePassword, maskEmail } from "@haanta/core"
 import { getBreachedPasswordChecker, getTurnstileVerifier } from "../../lib/adapters"
 import { getCounterStore } from "../../lib/counter-store"
-import { clientIp } from "../../lib/http"
+import { clientIp, fullPath } from "../../lib/http"
 import { captureAlert } from "../../lib/monitoring"
 
 /** Actor types that sign up/in from our Next apps (which render Turnstile). Admin users use MFA + lockout. */
@@ -19,7 +19,7 @@ const TURNSTILE_ACTORS = new Set(["customer", "vendor"])
 const FAILED_LOGIN_ALERT = { windowMs: 5 * 60_000, threshold: 50 }
 
 function actorFromPath(req: MedusaRequest): string {
-  return String((req.params as Record<string, string>)?.actor_type ?? req.path.split("/")[2] ?? "")
+  return String((req.params as Record<string, string>)?.actor_type || fullPath(req).split("/")[2] || "")
 }
 
 export async function requireTurnstile(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
