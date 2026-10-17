@@ -12,7 +12,7 @@ export const ProductReview = model
     title: model.text().nullable(),
     body: model.text(),
     fit: model.enum(["runs_small", "true_to_size", "runs_large"]).nullable(),
-    photos: model.json(),
+    photos: model.array(),
     status: model.enum(["pending", "approved", "rejected"]).default("pending"),
   })
   .indexes([{ on: ["product_id", "status"] }, { on: ["customer_id", "product_id"], unique: true }])

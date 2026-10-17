@@ -107,7 +107,7 @@
         },
         "recovery_hashes": {
           "name": "recovery_hashes",
-          "type": "jsonb",
+          "type": "text[]",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -119,7 +119,7 @@
           "default": null,
           "comment": null,
           "enumItems": [],
-          "mappedType": "json"
+          "mappedType": "array"
         },
         "created_at": {
           "name": "created_at",

@@ -1,6 +1,6 @@
 import { Migration } from "@medusajs/framework/mikro-orm/migrations";
 
-export class Migration20261017090926 extends Migration {
+export class Migration20261017092237 extends Migration {
 
   override async up(): Promise<void> {
     this.addSql(`alter table if exists "haanta_setting" drop constraint if exists "haanta_setting_key_unique";`);

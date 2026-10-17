@@ -42,6 +42,92 @@ export function validateImageUpload(
   return { ok: true, type: sniffed }
 }
 
+/**
+ * Remove metadata (EXIF, XMP, comments, text chunks) without re-encoding:
+ *   JPEG: drop APP1..APP15 (except APP14 Adobe colour info) and COM segments
+ *   PNG:  drop eXIf, tEXt, iTXt, zTXt and tIME chunks
+ *   WebP: drop EXIF and XMP  chunks and clear the VP8X metadata flags
+ * Returns a new buffer; throws if the structure is malformed.
+ */
+export function stripImageMetadata(bytes: Uint8Array, type: AllowedImageType): Uint8Array {
+  if (type === "image/jpeg") return stripJpeg(bytes)
+  if (type === "image/png") return stripPng(bytes)
+  return stripWebp(bytes)
+}
+
+function stripJpeg(b: Uint8Array): Uint8Array {
+  const out: number[] = [0xff, 0xd8]
+  let i = 2
+  while (i < b.length) {
+    if (b[i] !== 0xff) throw new Error("Malformed JPEG")
+    const marker = b[i + 1]!
+    // Start of scan: copy the rest (entropy-coded data + EOI) verbatim.
+    if (marker === 0xda) {
+      for (let j = i; j < b.length; j++) out.push(b[j]!)
+      return Uint8Array.from(out)
+    }
+    if (marker === 0xd9) {
+      out.push(0xff, 0xd9)
+      return Uint8Array.from(out)
+    }
+    if (i + 3 >= b.length) throw new Error("Malformed JPEG")
+    const len = (b[i + 2]! << 8) | b[i + 3]!
+    const end = i + 2 + len
+    if (len < 2 || end > b.length) throw new Error("Malformed JPEG")
+    const isMetadata = (marker >= 0xe1 && marker <= 0xef && marker !== 0xee) || marker === 0xfe
+    if (!isMetadata) for (let j = i; j < end; j++) out.push(b[j]!)
+    i = end
+  }
+  throw new Error("Malformed JPEG")
+}
+
+function stripPng(b: Uint8Array): Uint8Array {
+  const drop = new Set(["eXIf", "tEXt", "iTXt", "zTXt", "tIME"])
+  const out: number[] = Array.from(b.slice(0, 8))
+  let i = 8
+  while (i + 8 <= b.length) {
+    const len = ((b[i]! << 24) >>> 0) + (b[i + 1]! << 16) + (b[i + 2]! << 8) + b[i + 3]!
+    const type = String.fromCharCode(...b.slice(i + 4, i + 8))
+    const end = i + 12 + len
+    if (end > b.length) throw new Error("Malformed PNG")
+    if (!drop.has(type)) for (let j = i; j < end; j++) out.push(b[j]!)
+    i = end
+    if (type === "IEND") break
+  }
+  return Uint8Array.from(out)
+}
+
+function stripWebp(b: Uint8Array): Uint8Array {
+  const chunks: Uint8Array[] = []
+  let i = 12
+  while (i + 8 <= b.length) {
+    const fourcc = String.fromCharCode(...b.slice(i, i + 4))
+    const size = b[i + 4]! | (b[i + 5]! << 8) | (b[i + 6]! << 16) | ((b[i + 7]! << 24) >>> 0)
+    const end = i + 8 + size + (size % 2)
+    if (end > b.length + 1) throw new Error("Malformed WebP")
+    if (fourcc !== "EXIF" && fourcc !== "XMP ") {
+      const chunk = b.slice(i, Math.min(end, b.length))
+      if (fourcc === "VP8X" && chunk.length > 8) chunk[8] = chunk[8]! & ~0x0c // clear EXIF (0x08) and XMP (0x04) flags
+      chunks.push(chunk)
+    }
+    i = end
+  }
+  const body = chunks.reduce((n, c) => n + c.length, 0)
+  const out = new Uint8Array(12 + body)
+  out.set(b.slice(0, 12))
+  const riffSize = 4 + body
+  out[4] = riffSize & 255
+  out[5] = (riffSize >> 8) & 255
+  out[6] = (riffSize >> 16) & 255
+  out[7] = (riffSize >>> 24) & 255
+  let o = 12
+  for (const c of chunks) {
+    out.set(c, o)
+    o += c.length
+  }
+  return out
+}
+
 /** Validate a declared upload before issuing a signed direct-upload signature. */
 export function validateUploadRequest(input: { contentType: string; size: number }, maxBytes = MAX_IMAGE_BYTES): UploadProblem | null {
   if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(input.contentType)) return "unsupported_type"

@@ -88,15 +88,26 @@ export const ProductAttributes = model
     fulfilment_type: model.enum([...FULFILMENT_TYPES]).default("ready_to_wear"),
     lead_time_days: model.number().nullable(),
     is_preorder: model.boolean().default(false),
-    required_measurements: model.json(),
+    required_measurements: model.array(),
     size_chart_id: model.text().nullable(),
     fit_notes: model.text().nullable(),
-    styles: model.json(),
-    shops: model.json(),
-    merch: model.json(),
+    styles: model.array(),
+    shops: model.array(),
+    merch: model.array(),
     weight_missing: model.boolean().default(false),
+    /** Product-level markup override (finance role only). */
+    markup_bps: model.number().nullable(),
+    markup_fixed_minor: model.number().nullable(),
   })
   .indexes([{ on: ["vendor_id"] }])
+
+/** Category-level markup override (finance role only). */
+export const CategoryMarkup = model.define("category_markup", {
+  id: model.id({ prefix: "cmk" }).primaryKey(),
+  category_id: model.text().unique(),
+  markup_bps: model.number(),
+  markup_fixed_minor: model.number().default(0),
+})
 
 /** Server-computed prices per variant. Source of truth for vendor price; retail is pushed to Medusa prices. */
 export const VariantPricing = model
@@ -126,6 +137,9 @@ export const LinePriceSnapshot = model
     variant_id: model.text().nullable(),
     product_id: model.text().nullable(),
     vendor_id: model.text(),
+    product_title: model.text().nullable(),
+    variant_title: model.text().nullable(),
+    fulfilment_type: model.text().nullable(),
     quantity: model.number(),
     vendor_price_minor: model.number(),
     retail_price_minor: model.number(),

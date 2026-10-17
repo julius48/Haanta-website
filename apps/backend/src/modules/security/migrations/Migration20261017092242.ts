@@ -1,13 +1,13 @@
 import { Migration } from "@medusajs/framework/mikro-orm/migrations";
 
-export class Migration20261017090931 extends Migration {
+export class Migration20261017092242 extends Migration {
 
   override async up(): Promise<void> {
     this.addSql(`alter table if exists "webhook_event" drop constraint if exists "webhook_event_provider_event_id_unique";`);
     this.addSql(`alter table if exists "staff_role" drop constraint if exists "staff_role_user_id_unique";`);
     this.addSql(`alter table if exists "mfa_session" drop constraint if exists "mfa_session_key_hash_unique";`);
     this.addSql(`alter table if exists "mfa_factor" drop constraint if exists "mfa_factor_actor_type_actor_id_unique";`);
-    this.addSql(`create table if not exists "mfa_factor" ("id" text not null, "actor_type" text check ("actor_type" in ('user', 'vendor')) not null, "actor_id" text not null, "secret_enc" text not null, "confirmed_at" timestamptz null, "last_used_counter" integer null, "recovery_hashes" jsonb not null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "mfa_factor_pkey" primary key ("id"));`);
+    this.addSql(`create table if not exists "mfa_factor" ("id" text not null, "actor_type" text check ("actor_type" in ('user', 'vendor')) not null, "actor_id" text not null, "secret_enc" text not null, "confirmed_at" timestamptz null, "last_used_counter" integer null, "recovery_hashes" text[] not null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "mfa_factor_pkey" primary key ("id"));`);
     this.addSql(`CREATE INDEX IF NOT EXISTS "IDX_mfa_factor_deleted_at" ON "mfa_factor" ("deleted_at") WHERE deleted_at IS NULL;`);
     this.addSql(`CREATE UNIQUE INDEX IF NOT EXISTS "IDX_mfa_factor_actor_type_actor_id_unique" ON "mfa_factor" ("actor_type", "actor_id") WHERE deleted_at IS NULL;`);
 

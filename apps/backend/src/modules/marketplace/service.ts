@@ -1,5 +1,6 @@
 import { MedusaService, MedusaError } from "@medusajs/framework/utils"
 import {
+  CategoryMarkup,
   LinePriceSnapshot,
   ProductAttributes,
   ProductListing,
@@ -21,6 +22,7 @@ export class MarketplaceService extends MedusaService({
   VariantPricing,
   LinePriceSnapshot,
   VendorOrder,
+  CategoryMarkup,
 }) {
   /**
    * Vendor-scoped lookups. These always filter by the authenticated vendor and throw NOT_FOUND
@@ -39,7 +41,7 @@ export class MarketplaceService extends MedusaService({
   }
 
   async getOwnSizeChart(vendorId: string, sizeChartId: string) {
-    const [row] = await this.listSizeCharts({ id: sizeChartId, vendor: { id: vendorId } } as never)
+    const [row] = await this.listSizeCharts({ id: sizeChartId, vendor_id: vendorId })
     if (!row) throw new MedusaError(MedusaError.Types.NOT_FOUND, "Size chart not found")
     return row
   }

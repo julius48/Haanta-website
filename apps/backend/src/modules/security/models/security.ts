@@ -19,7 +19,7 @@ export const MfaFactor = model
     secret_enc: model.text(),
     confirmed_at: model.dateTime().nullable(),
     last_used_counter: model.number().nullable(),
-    recovery_hashes: model.json(),
+    recovery_hashes: model.array(),
   })
   .indexes([{ on: ["actor_type", "actor_id"], unique: true }])
 
