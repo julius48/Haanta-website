@@ -67,7 +67,11 @@ export async function guardLineItemMetadata(req: MedusaRequest, res: MedusaRespo
       }
     }
   }
-  body.metadata = measurements ? { measurements } : {}
+  const metadata = measurements ? { measurements } : {}
+  body.metadata = metadata
   req.body = body
+  // Medusa's own validator may already have run; the handler reads validatedBody, so clean it too.
+  const validated = (req as { validatedBody?: Record<string, unknown> }).validatedBody
+  if (validated && typeof validated === "object") validated.metadata = metadata
   next()
 }

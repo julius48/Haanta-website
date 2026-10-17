@@ -32,7 +32,7 @@
     "react-dom": "^18.3.1",
     "stripe": "^19.1.0",
     "zod": "^4.2.0",
-    "sanitize-html": "^2.17.0"
+    "sanitize-html": "2.17.1"
   },
   "devDependencies": {
     "@haanta/config": "workspace:*",

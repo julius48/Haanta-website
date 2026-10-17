@@ -2,24 +2,24 @@
  * Vendor order views. Built only from vendor_order, line price snapshots and order line items;
  * never from customer, email or address fields. Every view passes through toVendorOrderView.
  */
-import type { MedusaRequest } from "@medusajs/framework/http"
+import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { toVendorOrderView, type VendorOrderView } from "@haanta/core"
 import { HAANTA_SETTINGS_MODULE, type HaantaSettingsService } from "../modules/haanta-settings"
-import { marketplaceOf } from "./vendor-onboarding"
+import { MARKETPLACE_MODULE, type MarketplaceService } from "../modules/marketplace"
 
 type Query = { graph: (q: Record<string, unknown>) => Promise<{ data: Record<string, unknown>[] }> }
 
 /** Fields of order line items vendors may see. Do not add customer/address fields here. */
 const LINE_FIELDS = ["id", "items.id", "items.thumbnail", "items.variant_sku", "items.metadata"]
 
-export async function buildVendorOrderViews(req: MedusaRequest, vendorId: string, vendorOrders: Record<string, unknown>[]): Promise<VendorOrderView[]> {
+export async function buildVendorOrderViews(container: MedusaContainer, vendorId: string, vendorOrders: Record<string, unknown>[]): Promise<VendorOrderView[]> {
   if (!vendorOrders.length) return []
-  const marketplace = marketplaceOf(req)
-  const hub = (await req.scope.resolve<HaantaSettingsService>(HAANTA_SETTINGS_MODULE).getSettings("general")).hubAddress
+  const marketplace = container.resolve<MarketplaceService>(MARKETPLACE_MODULE)
+  const hub = (await container.resolve<HaantaSettingsService>(HAANTA_SETTINGS_MODULE).getSettings("general")).hubAddress
   const orderIds = vendorOrders.map((o) => o.order_id as string)
   const snapshots = await marketplace.listLinePriceSnapshots({ order_id: orderIds, vendor_id: vendorId }, { take: null })
-  const query = req.scope.resolve<Query>(ContainerRegistrationKeys.QUERY)
+  const query = container.resolve<Query>(ContainerRegistrationKeys.QUERY)
   const { data: orders } = await query.graph({ entity: "order", fields: LINE_FIELDS, filters: { id: orderIds } })
   const itemById = new Map<string, Record<string, unknown>>()
   for (const o of orders) for (const it of (o.items as Record<string, unknown>[] | undefined) ?? []) itemById.set(it.id as string, it)

@@ -4,7 +4,7 @@
  *   node scripts/dev-db.mjs start|stop|status
  * Elsewhere, `docker compose up -d postgres redis` gives the same databases.
  *
- * Listens on 127.0.0.1 only. The app connects as the non-superuser role `haanta`, which owns the
+ * Listens on loopback only (127.0.0.1 and ::1). The app connects as the non-superuser role `haanta`, which owns the
  * `haanta` and `haanta_test` databases (least privilege; production uses separate migration and
  * runtime roles, see docs/runbook.md).
  */
@@ -40,6 +40,11 @@ async function ensureRolesAndDatabases() {
   const { Client } = require("pg")
   const admin = new Client({ host: "127.0.0.1", port: Number(port), user: "postgres", password: superPassword, database: "postgres" })
   await admin.connect()
+  // Local dev/test cluster only: trade durability for speed (test databases are throwaway).
+  // NEVER use these settings for staging or production.
+  for (const s of ["fsync = off", "synchronous_commit = off", "full_page_writes = off", "max_connections = 200"]) {
+    await admin.query(`ALTER SYSTEM SET ${s}`)
+  }
   const role = await admin.query("SELECT 1 FROM pg_roles WHERE rolname = 'haanta'")
   if (role.rowCount === 0) {
     await admin.query(`CREATE ROLE haanta LOGIN PASSWORD '${appPassword.replace(/'/g, "''")}' CREATEDB NOSUPERUSER NOCREATEROLE`)
@@ -62,7 +67,7 @@ async function start() {
   const status = run(pg_ctl, ["status", "-D", dataDir], { allowFail: true, stdio: "ignore" })
   if (status !== 0) {
     // stdio must be detached: on Windows the server inherits the pipes and spawnSync would never return.
-    run(pg_ctl, ["start", "-D", dataDir, "-w", "-l", join(root, ".dev-db", "postgres.log"), "-o", `-p ${port} -h 127.0.0.1`], { stdio: "ignore" })
+    run(pg_ctl, ["start", "-D", dataDir, "-w", "-l", join(root, ".dev-db", "postgres.log"), "-o", `-p ${port} -h 127.0.0.1,::1`], { stdio: "ignore" })
   }
   await ensureRolesAndDatabases()
   console.log(`Postgres ready: postgres://haanta:***@127.0.0.1:${port}/haanta`)
