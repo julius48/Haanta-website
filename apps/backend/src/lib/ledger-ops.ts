@@ -48,10 +48,12 @@ export async function loadOrder(container: MedusaContainer, orderId: string) {
   const order = data[0]
   if (!order) throw new MedusaError(MedusaError.Types.NOT_FOUND, "Order not found")
   // Order line quantities live on the order item detail in Medusa v2.
-  const items = ((order.items as Record<string, unknown>[] | undefined) ?? []).map((it) => ({
-    ...it,
-    quantity: Number((it.detail as { quantity?: unknown } | undefined)?.quantity ?? it.quantity),
-  }))
+  const items = ((order.items as Record<string, unknown>[] | undefined) ?? []).map(
+    (it): Record<string, unknown> & { quantity: number } => ({
+      ...it,
+      quantity: Number((it.detail as { quantity?: unknown } | undefined)?.quantity ?? it.quantity),
+    }),
+  )
   for (const it of items) {
     if (!Number.isFinite(it.quantity) || !Number.isFinite(Number(it.unit_price))) throw new Error(`Order ${orderId} has an item without quantity or price`)
   }

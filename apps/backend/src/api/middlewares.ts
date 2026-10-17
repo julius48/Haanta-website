@@ -84,7 +84,7 @@ export default defineMiddlewares({
     { matcher: "/store/carts/:id/complete", method: ["POST"], middlewares: [rateLimit(RATE_LIMITS.checkout)] },
     { matcher: "/store/payment-collections*", method: ["POST"], middlewares: [rateLimit(RATE_LIMITS.checkout)] },
     { matcher: "/store/haanta/search", method: ["GET"], middlewares: [rateLimit(RATE_LIMITS.search), query(v.SearchQuery)] },
-    { matcher: "/store/haanta/products/:id/reviews", method: ["POST"], middlewares: [rateLimit(RATE_LIMITS.reviews), ...customer, body(v.ReviewCreateBody)] },
+    { matcher: "/store/haanta/products/:handle/reviews", method: ["POST"], middlewares: [rateLimit(RATE_LIMITS.reviews), ...customer, body(v.ReviewCreateBody)] },
     { matcher: "/store/haanta/newsletter", method: ["POST"], middlewares: [rateLimit(RATE_LIMITS.newsletter), body(v.NewsletterBody)] },
     { matcher: "/store/haanta/tracking", method: ["POST"], middlewares: [rateLimit(RATE_LIMITS.search), body(v.TrackingLookupBody)] },
     { matcher: "/store/haanta/me*", middlewares: customer },
