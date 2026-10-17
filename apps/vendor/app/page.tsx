@@ -1,15 +1,8 @@
-import { connection } from "next/server"
-import { Container, Wordmark } from "@haanta/ui"
+import { redirect } from "next/navigation"
+import { nextStep } from "@/lib/auth-flow"
+import { getMe } from "@/lib/server/session"
 
 export default async function VendorHome() {
-  await connection()
-  return (
-    <main id="main">
-      <Container>
-        <h1>
-          <Wordmark /> Partner Portal
-        </h1>
-      </Container>
-    </main>
-  )
+  const me = await getMe()
+  redirect(me ? nextStep(me) : "/login")
 }

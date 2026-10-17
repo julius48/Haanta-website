@@ -204,6 +204,49 @@ export function getImageUploads(): ImageUploads {
   }
 }
 
+// ---------------------------------------------------------------- catalog image mirroring
+
+export interface ImageMirror {
+  /** Copy a catalog image (Wix media) into Haanta's image store; returns the new URL. */
+  mirror(sourceUrl: string, folder: string): Promise<string>
+}
+
+/** Mirrored URLs recorded by the local mock (tests/inspection). */
+export const mirroredImages = new Map<string, string>()
+
+/**
+ * Cloudinary: signed upload-by-URL, so Cloudinary fetches the Wix image (our servers never download
+ * remote content). Locally: a pass-through that keeps the Wix URL and records the mapping.
+ */
+export function getImageMirror(): ImageMirror {
+  const cloud = env.CLOUDINARY_CLOUD_NAME
+  const apiKey = env.CLOUDINARY_API_KEY
+  const apiSecret = env.CLOUDINARY_API_SECRET
+  if (!cloud || !apiKey || !apiSecret || isTest) {
+    return {
+      async mirror(url) {
+        mirroredImages.set(url, url)
+        return url
+      },
+    }
+  }
+  return {
+    async mirror(url, folder) {
+      if (!/^https:\/\/static\.wixstatic\.com\/media\//.test(url)) return url
+      const publicId = url.split("/").pop()!.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 100)
+      const timestamp = String(Math.floor(Date.now() / 1000))
+      const params: Record<string, string> = { folder, overwrite: "false", public_id: publicId, timestamp, upload_preset: env.CLOUDINARY_UPLOAD_PRESET || "haanta_signed" }
+      const toSign = Object.keys(params).sort().map((k) => `${k}=${params[k]}`).join("&")
+      const signature = createHmac("sha256", apiSecret).update(toSign).digest("hex")
+      const body = new URLSearchParams({ ...params, file: url, api_key: apiKey, signature, signature_algorithm: "sha256" })
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`, { method: "POST", body, signal: AbortSignal.timeout(30000) })
+      if (!res.ok) return url // keep the Wix URL; the image can be re-mirrored on a re-run
+      const data = (await res.json()) as { secure_url?: string }
+      return data.secure_url ?? url
+    },
+  }
+}
+
 export function localUploadSignature(payload: string): string {
   return createHmac("sha256", env.UPLOAD_SIGNING_SECRET || env.COOKIE_SECRET || "dev-upload-secret").update(payload).digest("hex")
 }
