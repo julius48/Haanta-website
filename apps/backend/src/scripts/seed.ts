@@ -73,6 +73,30 @@ export default async function seed({ container }: ExecArgs) {
     }
   }
 
+  // Local e2e vendor: active, email verified, TOTP enrolled with a known secret. Never in production.
+  if (process.env.NODE_ENV !== "production") {
+    const email = process.env.E2E_VENDOR_EMAIL || "e2e-vendor@haanta.local"
+    const password = process.env.E2E_VENDOR_PASSWORD || "haanta-e2e-vendor-2026"
+    const secret = process.env.E2E_VENDOR_TOTP_SECRET || "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"
+    const [existing] = await marketplace.listVendorUsers({ email })
+    if (!existing) {
+      const auth = container.resolve(Modules.AUTH)
+      const { authIdentity } = await auth.register("emailpass", { body: { email, password } } as never)
+      const [vendor] = await marketplace.listVendors({ slug: "adire-atelier-demo" })
+      const user = await marketplace.createVendorUsers({ email, name: "E2E Vendor", role: "owner", email_verified_at: new Date(), vendor_id: vendor!.id } as never)
+      await auth.updateAuthIdentities({ id: authIdentity!.id, app_metadata: { vendor_id: user.id } })
+      const { encryptSecret } = await import("@haanta/core")
+      await container.resolve<SecurityService>(SECURITY_MODULE).createMfaFactors({
+        actor_type: "vendor",
+        actor_id: user.id,
+        secret_enc: encryptSecret(secret, process.env.MFA_ENCRYPTION_KEY!),
+        confirmed_at: new Date(),
+        recovery_hashes: [],
+      })
+      logger.info(`[seed] e2e vendor: ${email} / ${password} (TOTP secret ${secret}; local only)`)
+    }
+  }
+
   logger.info(`[seed] publishable key: ${setup.publishable_key}`)
   logger.info(`[seed] admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD} (local only)`)
 }

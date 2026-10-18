@@ -138,7 +138,8 @@ export default async function importCatalog({ container, args = [] }: ExecArgs) 
       const [listing] = await marketplace.listProductListings({ product_id })
       if (listing) await marketplace.updateProductListings({ id: listing.id, title: p.name, status: "live", approved_snapshot: snapshot as never, pending_snapshot: null })
       else await marketplace.createProductListings({ vendor_id: vendorId, product_id, title: p.name, status: "live", approved_snapshot: snapshot as never, weight_missing: snapshot.variants.some((v) => !v.weight_kg) })
-      productId ? updated++ : imported++
+      if (productId) updated++
+      else imported++
       for (const promo of p.promotions) (promoProducts[promo] ??= []).push(product_id)
       if (p.sale_percent) {
         const { data: variants } = await query.graph({ entity: "product_variant", fields: ["id", "title"], filters: { product_id } })
