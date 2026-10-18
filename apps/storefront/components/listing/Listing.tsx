@@ -176,7 +176,10 @@ export function Listing({ title, intro, hero, filters, ctx, result, currency, sa
                 </Link>
               </div>
             ) : (
-              <ProductGrid docs={result.hits} currency={currency} savedIds={savedIds} label={title} priorityCount={2} />
+              <>
+                <h2 className="h-sr-only">Products</h2>
+                <ProductGrid docs={result.hits} currency={currency} savedIds={savedIds} label={title} priorityCount={2} />
+              </>
             )}
 
             {result.pages > 1 ? <Pagination ctx={ctx} filters={filters} pages={result.pages} /> : null}

@@ -41,6 +41,8 @@ pnpm --dir apps/backend exec medusa develop # backend :9000, admin at /app
 pnpm --filter @haanta/storefront dev        # :3000 (needs apps/storefront/.env.local)
 pnpm --filter @haanta/vendor dev            # :3001
 pnpm -r --filter "./packages/*" test        # Vitest (shipping, pricing, core, ui)
+pnpm --dir apps/backend exec medusa exec ./src/scripts/e2e-fixtures.ts   # before e2e: publish demo fixtures, stock 100
+cd apps/storefront && npx playwright test   # e2e vs running storefront :3000 + backend :9000 (backend .env: RATE_LIMIT_SCALE=20)
 cd apps/backend && npx cross-env TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand --forceExit integration-tests/http/<file>.spec.ts
 npx tsc --noEmit && npx eslint .   # in any package/app
 ```
@@ -80,3 +82,8 @@ Rebuild packages after changing them (backend consumes `dist/`): `npx tsup …` 
 - Next 16 docs ship in `node_modules/next/dist/docs/`; `next dev` writes `AGENTS.md` in each app (commit it).
 - Local Postgres has `fsync=off` for speed (dev/test only; never staging/production).
 - Disk is tight on the dev machine (~3 GB free): Playwright uses the installed Edge (`channel: "msedge"`), no browser downloads.
+- e2e tests buy the `-demo` fixture products (hidden from search/listings), never "the first product": the real catalog has 1–2 units per variant and test orders would sell it out.
+- `next/image` is a client component: in server components use `ProductImage` (plain `<img>` via `getImageProps`). Card/nav behaviour lives in page-level controllers (`CardActions`, `MegaMenuController`), not per-item islands.
+- React 19 resets a form after its action runs: echo non-secret values back (`values` in `ActionState`) and use them as `defaultValue`.
+- Product `query.graph` with `variants.options.option.*` or deep inventory joins is very slow on the full catalog (blocks the event loop); see `lib/search.ts` for the paged + flat-query pattern.
+- Local Lighthouse is noisy on this machine (dev servers, other apps): use the median of three runs and confirm on pagespeed.web.dev once staging exists.

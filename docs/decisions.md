@@ -41,3 +41,16 @@ The legacy Wix file differs from the brief in places. The engine ports the **fil
 | U2 | Grid unit 8 px; page margins two units (16 px mobile, 32 px desktop). |
 | U3 | Tan text is only allowed on brown or the gradient (fails AA on white). Approved pairs are tested in `packages/ui`. |
 | U4 | Added neutrals derived from the palette (cream, sand, ink, muted) for surfaces and body text; all pass AA. |
+
+## Storefront and search (2026-10-18)
+
+| # | Decision |
+|---|----------|
+| F1 | **Size guide on every product.** The designer's chart is shown first when they have one; the Haanta standard women's/men's chart (US/UK sizes, body measurements in inches) and how-to-measure follow. The standard figures are industry ranges and **should be confirmed by Haanta** (`apps/storefront/lib/size-chart.ts`). |
+| F2 | **Optional custom sizing on every product.** Any measurement the shopper fills in is range-checked (client and server) and stored on the line item like made-to-order measurements; vendors already see these on their orders. Blank means the standard size. Made-to-order products still require their listed measurements. |
+| F3 | Sold-out variants are disabled on the product page and quick view; only an in-stock yes/no reaches the browser (exact stock stays on the server). Product JSON-LD availability follows real stock. |
+| F4 | Product cards and the desktop mega menu are server-rendered HTML with one small page-level controller each (`CardActions`, `MegaMenuController`) instead of a React island per card/panel. Images are plain server `<img>` built with `getImageProps` (same srcset as next/image, nothing to hydrate); card hover images use a single 640px source. |
+| F5 | Legacy Wix URLs (1,463 `/product-page/*` 301s) are served from a Map in `proxy.ts`, not `next.config` redirects (those are regex-matched on every request). |
+| F6 | **Search index:** built from the database in pages of 200 products with stock from two flat queries (cold build ~10 s, was 34 s; longest event-loop stall ~1 s, was ~19 s). Product and order events trigger a debounced rebuild; a job every 15 minutes is the backstop; Algolia is pushed the same documents when configured. |
+| F7 | **Demo/e2e fixtures:** seeded vendors with slugs ending `-demo` stay buyable by direct URL but are excluded from search, listings and the designers list. `src/scripts/e2e-fixtures.ts` publishes them and resets their stock to 100 before e2e runs (refuses to run in production). |
+| F8 | `RATE_LIMIT_SCALE` multiplies rate limits for local e2e runs only; it is ignored in production and under the test runner (integration tests assert the real limits). |

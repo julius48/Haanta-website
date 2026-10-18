@@ -14,18 +14,42 @@ export async function quietContext(context: BrowserContext, baseURL = "http://lo
 
 export type Origin = "houston" | "lagos"
 
-/** Open the first ready-to-wear product from a stock location and add it to the bag. Returns its title. */
-export async function addFirstProduct(page: Page, origin: Origin, opts: { fulfilment?: "ready_to_wear" | "made_to_order" } = {}): Promise<string> {
-  await page.goto(`/shop?ships_from=${origin}&fulfilment=${opts.fulfilment ?? "ready_to_wear"}`)
-  const card = page.getByTestId("product-card").first()
-  await expect(card).toBeVisible()
-  await card.getByTestId("product-card-link").click()
+/**
+ * Stable, well-stocked products from the seed (demo vendors, hidden from search and listings).
+ * Prepare them before a run: pnpm --dir apps/backend exec medusa exec ./src/scripts/e2e-fixtures.ts
+ */
+export const FIXTURES = {
+  houston: "/products/aso-oke-bomber-jacket-lekki-loom-demo",
+  lagos: "/products/adire-wrap-dress-adire-atelier-demo",
+  madeToOrder: "/products/indigo-two-piece-set-adire-atelier-demo",
+} as const
+
+/** Open the ready-to-wear fixture for a stock location and add it to the bag. Returns its title. */
+export async function addFixtureProduct(page: Page, origin: Origin): Promise<string> {
+  await page.goto(FIXTURES[origin])
   await expect(page.getByTestId("pdp-title")).toBeVisible()
   const title = (await page.getByTestId("pdp-title").textContent())?.trim() ?? ""
   await chooseFirstOptions(page)
   await page.getByTestId("add-to-cart").click()
   await expect(page.getByTestId("add-to-cart-status")).toContainText(/Added to your bag/i)
   return title
+}
+
+/**
+ * Real-catalog flows: open product cards in order until one can be bought (stock is real, so the
+ * first card may be sold out). Leaves the page on that product with its first options chosen.
+ */
+export async function openFirstPurchasable(page: Page, listingUrl: string, tries = 6) {
+  for (let i = 0; i < tries; i++) {
+    await page.goto(listingUrl)
+    const cards = page.getByTestId("product-card")
+    if ((await cards.count()) <= i) break
+    await cards.nth(i).getByTestId("product-card-link").click()
+    await expect(page.getByTestId("pdp-title")).toBeVisible()
+    await chooseFirstOptions(page)
+    if (await page.getByTestId("add-to-cart").isEnabled()) return
+  }
+  throw new Error(`No purchasable product found on ${listingUrl}`)
 }
 
 export async function chooseFirstOptions(page: Page) {

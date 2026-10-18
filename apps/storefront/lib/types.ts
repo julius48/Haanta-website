@@ -144,6 +144,11 @@ export interface StoreVariant {
   sku?: string | null
   options?: { id: string; value: string; option_id?: string | null; option?: { id: string; title: string } | null }[] | null
   calculated_price?: CalculatedPrice | null
+  inventory_quantity?: number | null
+  manage_inventory?: boolean | null
+  allow_backorder?: boolean | null
+  /** Set by slimForClient (server): whether this variant can be bought now. */
+  in_stock?: boolean
 }
 
 export interface StoreProduct {
@@ -288,4 +293,4 @@ export interface TrackingResult {
 export type ActionState<T = undefined> =
   | { status: "idle" }
   | { status: "ok"; message?: string; data?: T }
-  | { status: "error"; message: string; fieldErrors?: Record<string, string> }
+  | { status: "error"; message: string; fieldErrors?: Record<string, string>; /** Non-secret inputs echoed back so a failed submit never wipes the form. */ values?: Record<string, string> }

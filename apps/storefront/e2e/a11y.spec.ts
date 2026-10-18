@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test"
 import AxeBuilder from "@axe-core/playwright"
-import { addFirstProduct, quietContext } from "./helpers"
+import { addFixtureProduct, quietContext } from "./helpers"
 
 test.beforeEach(async ({ context, baseURL }) => quietContext(context, baseURL))
 
@@ -22,7 +22,7 @@ test("home, listing and product have no serious or critical violations", async (
 })
 
 test("cart and checkout have no serious or critical violations", async ({ page }) => {
-  await addFirstProduct(page, "houston")
+  await addFixtureProduct(page, "houston")
   await page.goto("/cart")
   await expect(page.getByTestId("cart-line").first()).toBeVisible()
   await scan(page, "cart")

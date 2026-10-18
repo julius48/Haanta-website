@@ -2,7 +2,7 @@ import "server-only"
 import { cache } from "react"
 import { ApiError, medusa } from "./medusa"
 import { toSearchQuery, type ListingFilters } from "@/lib/filters"
-import type { BrandDetail, BrandSummary, ProductExtras, SearchResult, Settings, StoreProduct } from "@/lib/types"
+import type { StoreVariant, BrandDetail, BrandSummary, ProductExtras, SearchResult, Settings, StoreProduct } from "@/lib/types"
 
 const EMPTY_RESULT: SearchResult = { hits: [], total: 0, page: 1, pages: 1, facets: {}, price_range: { min: 0, max: 0 } }
 
@@ -50,7 +50,7 @@ export const getBrand = cache(async (slug: string, currency: string): Promise<Br
   }
 })
 
-const PRODUCT_FIELDS = "*variants.calculated_price,*variants.options,*options,*images,*categories"
+const PRODUCT_FIELDS = "*variants.calculated_price,*variants.options,+variants.inventory_quantity,+variants.manage_inventory,+variants.allow_backorder,*options,*images,*categories"
 
 export const isHandle = (h: string) => /^[a-z0-9][a-z0-9-]{0,199}$/i.test(h)
 
@@ -99,6 +99,12 @@ export function productPrice(p: StoreProduct): { amount: number | null; original
 }
 
 /** Minimal option/variant shapes for client components (keeps the RSC payload small). */
+/** Purchasable now: stock not tracked (e.g. made to order), backorders allowed, or units on hand. */
+export function variantInStock(v: StoreVariant): boolean {
+  if (v.manage_inventory === false || v.allow_backorder === true) return true
+  return v.inventory_quantity == null ? true : v.inventory_quantity > 0
+}
+
 export function slimForClient(p: StoreProduct): { options: NonNullable<StoreProduct["options"]>; variants: NonNullable<StoreProduct["variants"]> } {
   return {
     options: (p.options ?? []).map((o) => ({ id: o.id, title: o.title, values: (o.values ?? []).map((v) => ({ id: v.id, value: v.value })) })),
@@ -109,6 +115,8 @@ export function slimForClient(p: StoreProduct): { options: NonNullable<StoreProd
       calculated_price: v.calculated_price
         ? { calculated_amount: v.calculated_price.calculated_amount, original_amount: v.calculated_price.original_amount, currency_code: v.calculated_price.currency_code }
         : null,
+      // Only a yes/no reaches the browser; exact stock levels stay on the server.
+      in_stock: variantInStock(v),
     })),
   }
 }

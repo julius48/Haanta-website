@@ -70,8 +70,9 @@ export function AddToCartForm(p: AddToCartProps) {
     )
   }, [p.variants, p.options, selected])
 
-  const available = (optionId: string, title: string, value: string) =>
-    p.variants.some(
+  // Variants matching this option value and the other current selections.
+  const matching = (optionId: string, title: string, value: string) =>
+    p.variants.filter(
       (v) =>
         optionValue(v, optionId, title) === value &&
         p.options.every(
@@ -81,6 +82,8 @@ export function AddToCartForm(p: AddToCartProps) {
             optionValue(v, o.id, o.title) === selected[o.id],
         ),
     )
+  const inStock = (v: StoreVariant) => v.in_stock !== false
+  const soldOut = variant ? !inStock(variant) : !p.variants.some(inStock)
 
   const fulfilment = variant
     ? (p.variantFulfilment[variant.id] ?? p.defaultFulfilment)
@@ -200,7 +203,9 @@ export function AddToCartForm(p: AddToCartProps) {
           <div className="s-options__list">
             {(o.values ?? []).map((v) => {
               const id = `${uid}-${o.id}-${v.id}`
-              const ok = available(o.id, o.title, v.value)
+              const combos = matching(o.id, o.title, v.value)
+              const ok = combos.some(inStock)
+              const reason = combos.length ? "sold out" : "unavailable"
               return (
                 <span key={v.id} className="s-option">
                   <input
@@ -222,7 +227,7 @@ export function AddToCartForm(p: AddToCartProps) {
                       />
                     ) : null}
                     {v.value}
-                    {!ok ? <span className="h-sr-only"> (unavailable)</span> : null}
+                    {!ok ? <span className="h-sr-only"> ({reason})</span> : null}
                   </label>
                 </span>
               )
@@ -365,10 +370,10 @@ export function AddToCartForm(p: AddToCartProps) {
         <button
           type="submit"
           className="h-btn h-btn--primary s-atc__submit"
-          disabled={pending}
+          disabled={pending || soldOut}
           data-testid="add-to-cart"
         >
-          {pending ? "Adding…" : p.isPreorder ? "Pre-order" : "Add to bag"}
+          {soldOut ? "Sold out" : pending ? "Adding…" : p.isPreorder ? "Pre-order" : "Add to bag"}
         </button>
       </div>
 

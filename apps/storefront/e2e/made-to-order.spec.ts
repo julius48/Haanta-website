@@ -1,11 +1,10 @@
 import { expect, test } from "@playwright/test"
-import { chooseFirstOptions, quietContext } from "./helpers"
+import { FIXTURES, chooseFirstOptions, quietContext } from "./helpers"
 
 test.beforeEach(async ({ context, baseURL }) => quietContext(context, baseURL))
 
 test("made-to-order items require measurements before adding to the bag", async ({ page }) => {
-  await page.goto("/shop?fulfilment=made_to_order")
-  await page.getByTestId("product-card").first().getByTestId("product-card-link").click()
+  await page.goto(FIXTURES.madeToOrder)
   await expect(page.getByTestId("measurements")).toBeVisible()
   await chooseFirstOptions(page)
 
@@ -22,10 +21,15 @@ test("made-to-order items require measurements before adding to the bag", async 
   await page.getByTestId("add-to-cart").click()
   await expect(page.getByTestId("measurements")).toContainText(/between/i)
 
-  // Valid measurements succeed and appear in the bag.
-  for (let i = 0; i < n; i++) await inputs.nth(i).fill("36")
+  // Valid measurements (mid-range for each field) succeed and appear in the bag.
+  for (let i = 0; i < n; i++) {
+    const input = inputs.nth(i)
+    const min = Number(await input.getAttribute("min"))
+    const max = Number(await input.getAttribute("max"))
+    await input.fill(String(Math.round((min + max) / 2)))
+  }
   await page.getByTestId("add-to-cart").click()
   await expect(page.getByTestId("add-to-cart-status")).toContainText(/Added to your bag/i)
   await page.goto("/cart")
-  await expect(page.getByTestId("line-measurements")).toContainText("36 in")
+  await expect(page.getByTestId("line-measurements")).toContainText(/\d+ in/)
 })

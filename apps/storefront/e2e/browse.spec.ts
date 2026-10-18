@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { chooseFirstOptions, quietContext } from "./helpers"
+import { openFirstPurchasable, quietContext } from "./helpers"
 
 test.beforeEach(async ({ context, baseURL }) => quietContext(context, baseURL))
 
@@ -23,10 +23,8 @@ test("browse → filter → product → add to cart @mobile", async ({ page }) =
   await expect(page.getByTestId("product-card").first()).toBeVisible()
   for (const card of await page.getByTestId("product-card").all()) await expect(card).toHaveAttribute("data-ships-from", /houston/)
 
-  await page.getByTestId("product-card").first().getByTestId("product-card-link").click()
-  await expect(page.getByTestId("pdp-title")).toBeVisible()
+  await openFirstPurchasable(page, page.url())
   await expect(page.getByTestId("pdp-ships-from")).toContainText(/US/)
-  await chooseFirstOptions(page)
   await page.getByTestId("add-to-cart").click()
   await expect(page.getByTestId("add-to-cart-status")).toContainText(/Added to your bag/i)
 
@@ -37,11 +35,16 @@ test("browse → filter → product → add to cart @mobile", async ({ page }) =
 
 test("quick view adds to cart from the listing", async ({ page }) => {
   await page.goto("/shop?ships_from=houston&fulfilment=ready_to_wear")
-  await page.getByTestId("quick-view-button").first().click()
   const dialog = page.getByTestId("quick-view")
-  await expect(dialog).toBeVisible()
-  await expect(dialog.getByTestId("add-to-cart")).toBeVisible()
-  await dialog.locator("fieldset.s-options").first().locator("input:not([disabled]) + label").first().click()
+  // Real stock: try cards in order until the quick view offers an in-stock option.
+  for (let i = 0; i < 6; i++) {
+    await page.getByTestId("quick-view-button").nth(i).click()
+    await expect(dialog.getByTestId("add-to-cart")).toBeVisible()
+    for (const group of await dialog.locator("fieldset.s-options").all()) await group.locator("input:not([disabled]) + label").first().click()
+    if (await dialog.getByTestId("add-to-cart").isEnabled()) break
+    await page.keyboard.press("Escape")
+    await expect(dialog).toBeHidden()
+  }
   await dialog.getByTestId("add-to-cart").click()
   await expect(dialog.getByTestId("add-to-cart-status")).toContainText(/Added/i)
   await page.keyboard.press("Escape")

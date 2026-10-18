@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { ADDRESSES, addFirstProduct, fillAddress, payWithTestCard, quietContext } from "./helpers"
+import { ADDRESSES, addFixtureProduct, fillAddress, payWithTestCard, quietContext } from "./helpers"
 
 test.beforeEach(async ({ context, baseURL }) => quietContext(context, baseURL))
 
@@ -13,7 +13,7 @@ test("unknown orders show a friendly not-found message", async ({ page }) => {
 
 test("a placed order can be tracked by number and email", async ({ page }) => {
   const email = `track+${Date.now()}@example.com`
-  await addFirstProduct(page, "houston")
+  await addFixtureProduct(page, "houston")
   await fillAddress(page, ADDRESSES.TX, email)
   const orderNumber = await payWithTestCard(page)
   await page.goto("/track")

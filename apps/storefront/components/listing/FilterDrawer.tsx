@@ -98,6 +98,7 @@ export function FilterDrawer({ children, activeCount }: { children: React.ReactN
         id="filters-panel"
         ref={panel}
         className={`s-filters ${open ? "is-open" : ""}`}
+        data-open={open}
         role={open ? "dialog" : "region"}
         aria-modal={open ? true : undefined}
         aria-label="Filters"

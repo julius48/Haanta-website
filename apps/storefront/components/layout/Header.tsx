@@ -86,8 +86,12 @@ export async function Header() {
             </button>
           </form>
         </div>
-        <Link href="/" className="s-logo" aria-label="Haanta home">
-          <Wordmark />
+        <Link href="/" className="s-logo">
+          {/* The stylised wordmark is decorative; the link's name comes from the text below (WCAG 2.5.3). */}
+          <span aria-hidden="true">
+            <Wordmark />
+          </span>
+          <span className="h-sr-only">Haanta home</span>
         </Link>
         <div className="s-header__actions">
           <Link href="/search" className="s-icon-btn s-search-toggle" aria-label="Search">

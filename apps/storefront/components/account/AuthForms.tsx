@@ -9,14 +9,16 @@ import type { ActionState } from "@/lib/types"
 
 const idle: ActionState = { status: "idle" }
 const fe = (s: ActionState) => (s.status === "error" ? (s.fieldErrors ?? {}) : {})
+const kept = (s: ActionState) => (s.status === "error" ? (s.values ?? {}) : {})
 
 export function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(loginAction, idle)
   const e = fe(state)
+  const v = kept(state)
   return (
     <form action={action} className="s-auth-form" noValidate data-testid="login-form">
       <input type="hidden" name="next" value={next ?? "/account"} />
-      <Field id="login-email" name="email" label="Email" type="email" autoComplete="email" required error={e.email} data-testid="login-email" />
+      <Field id="login-email" name="email" label="Email" type="email" autoComplete="email" required defaultValue={v.email} error={e.email} data-testid="login-email" />
       <Field id="login-password" name="password" label="Password" type="password" autoComplete="current-password" required error={e.password} data-testid="login-password" />
       <Turnstile />
       <FormMessage state={state} />
@@ -33,13 +35,14 @@ export function LoginForm({ next }: { next?: string }) {
 export function RegisterForm() {
   const [state, action, pending] = useActionState(registerAction, idle)
   const e = fe(state)
+  const v = kept(state)
   return (
     <form action={action} className="s-auth-form" noValidate data-testid="register-form">
       <div className="s-form-row">
-        <Field id="reg-first" name="first_name" label="First name" autoComplete="given-name" required error={e.first_name} data-testid="register-first-name" />
-        <Field id="reg-last" name="last_name" label="Last name" autoComplete="family-name" required error={e.last_name} data-testid="register-last-name" />
+        <Field id="reg-first" name="first_name" label="First name" autoComplete="given-name" required defaultValue={v.first_name} error={e.first_name} data-testid="register-first-name" />
+        <Field id="reg-last" name="last_name" label="Last name" autoComplete="family-name" required defaultValue={v.last_name} error={e.last_name} data-testid="register-last-name" />
       </div>
-      <Field id="reg-email" name="email" label="Email" type="email" autoComplete="email" required error={e.email} data-testid="register-email" />
+      <Field id="reg-email" name="email" label="Email" type="email" autoComplete="email" required defaultValue={v.email} error={e.email} data-testid="register-email" />
       <Field
         id="reg-password"
         name="password"
@@ -64,9 +67,10 @@ export function RegisterForm() {
 export function ForgotPasswordForm() {
   const [state, action, pending] = useActionState(forgotPasswordAction, idle)
   const e = fe(state)
+  const v = kept(state)
   return (
     <form action={action} className="s-auth-form" noValidate>
-      <Field id="forgot-email" name="email" label="Email" type="email" autoComplete="email" required error={e.email} />
+      <Field id="forgot-email" name="email" label="Email" type="email" autoComplete="email" required defaultValue={v.email} error={e.email} />
       <Turnstile />
       <FormMessage state={state} />
       <button type="submit" className="h-btn h-btn--primary s-btn-block" disabled={pending}>

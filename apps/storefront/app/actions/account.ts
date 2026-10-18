@@ -51,7 +51,7 @@ async function startSession(token: string) {
 
 const LoginSchema = z.object({ email, password })
 
-export async function loginAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+async function loginActionImpl(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = LoginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") })
   if (!parsed.success) return { status: "error", message: "Please check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) }
   const token = turnstileToken(formData)
@@ -73,7 +73,7 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
 
 const RegisterSchema = z.object({ first_name: name("first name"), last_name: name("last name"), email, password: newPassword })
 
-export async function registerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+async function registerActionImpl(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = RegisterSchema.safeParse({
     first_name: formData.get("first_name"),
     last_name: formData.get("last_name"),
@@ -116,7 +116,7 @@ export async function logoutAction(): Promise<void> {
   redirect("/")
 }
 
-export async function forgotPasswordAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+async function forgotPasswordActionImpl(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = email.safeParse(formData.get("email"))
   if (!parsed.success) return { status: "error", message: "Enter a valid email address.", fieldErrors: { email: "Enter a valid email address" } }
   const token = turnstileToken(formData)
@@ -211,3 +211,21 @@ export async function submitReviewAction(_prev: ActionState, formData: FormData)
     return { status: "error", message: errorMessage(e) }
   }
 }
+
+/** Echo non-secret fields back on error: React resets the form after an action, which would wipe them. */
+function keepValues(names: string[], action: (prev: ActionState, formData: FormData) => Promise<ActionState>) {
+  return async (prev: ActionState, formData: FormData): Promise<ActionState> => {
+    const res = await action(prev, formData)
+    if (res.status !== "error") return res
+    const values: Record<string, string> = {}
+    for (const n of names) {
+      const v = formData.get(n)
+      if (typeof v === "string") values[n] = v.slice(0, 200)
+    }
+    return { ...res, values }
+  }
+}
+
+export const loginAction = keepValues(["email"], loginActionImpl)
+export const registerAction = keepValues(["first_name", "last_name", "email"], registerActionImpl)
+export const forgotPasswordAction = keepValues(["email"], forgotPasswordActionImpl)

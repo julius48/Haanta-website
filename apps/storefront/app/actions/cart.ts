@@ -74,6 +74,9 @@ export async function addToCartAction(input: AddToCartInput): Promise<AddToCartR
     refresh()
     return { ok: true, count: (cart.items ?? []).reduce((n, i) => n + Number(i.quantity), 0) }
   } catch (e) {
+    if (e instanceof ApiError && /inventory|stock/i.test(e.body?.message ?? "")) {
+      return { ok: false, message: "Sorry, that option has just sold out. Please choose another." }
+    }
     if (e instanceof ApiError && e.body?.code === "measurements_required") {
       const missing = (e.body as { missing?: string[] }).missing ?? []
       const fieldErrors = Object.fromEntries(

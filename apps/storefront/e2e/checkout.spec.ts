@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { ADDRESSES, addFirstProduct, fillAddress, payWithTestCard, quietContext } from "./helpers"
+import { ADDRESSES, addFixtureProduct, fillAddress, payWithTestCard, quietContext } from "./helpers"
 
 /**
  * Shipping scenarios from the Haanta engine (packages/shipping, legacy Wix rules):
@@ -12,7 +12,7 @@ import { ADDRESSES, addFirstProduct, fillAddress, payWithTestCard, quietContext 
 test.beforeEach(async ({ context, baseURL }) => quietContext(context, baseURL))
 
 test("US stock → Texas: standard US delivery, pays with test card", async ({ page }) => {
-  await addFirstProduct(page, "houston")
+  await addFixtureProduct(page, "houston")
   const codes = await fillAddress(page, ADDRESSES.TX)
   expect(codes).toEqual(["standard_rate"])
   await expect(page.getByTestId("shipping-option").first()).toContainText(/Shipping from US/i)
@@ -21,7 +21,7 @@ test("US stock → Texas: standard US delivery, pays with test card", async ({ p
 })
 
 test("Nigeria stock → Texas: standard and DHL expedited", async ({ page }) => {
-  await addFirstProduct(page, "lagos")
+  await addFixtureProduct(page, "lagos")
   const codes = await fillAddress(page, ADDRESSES.TX)
   expect(codes).toEqual(["standard_rate", "expedited_rate"])
   await expect(page.locator('[data-code="expedited_rate"]')).toContainText(/DHL/)
@@ -29,7 +29,7 @@ test("Nigeria stock → Texas: standard and DHL expedited", async ({ page }) => 
 })
 
 test("US stock → Alaska: UPS options", async ({ page }) => {
-  await addFirstProduct(page, "houston")
+  await addFixtureProduct(page, "houston")
   const codes = await fillAddress(page, ADDRESSES.AK)
   expect(codes.length).toBeGreaterThan(0)
   for (const c of codes) expect(c).toMatch(/^ups-/)
@@ -38,7 +38,7 @@ test("US stock → Alaska: UPS options", async ({ page }) => {
 })
 
 test("Nigeria stock → Canada: standard and DHL expedited, CAD prices", async ({ page }) => {
-  await addFirstProduct(page, "lagos")
+  await addFixtureProduct(page, "lagos")
   const codes = await fillAddress(page, ADDRESSES.CA)
   expect(codes).toEqual(["standard_rate", "expedited_rate"])
   await expect(page.getByTestId("summary-total")).toContainText(/CA\$/)
@@ -46,24 +46,26 @@ test("Nigeria stock → Canada: standard and DHL expedited, CAD prices", async (
 })
 
 test("US stock → Canada: UPS options", async ({ page }) => {
-  await addFirstProduct(page, "houston")
+  await addFixtureProduct(page, "houston")
   const codes = await fillAddress(page, ADDRESSES.CA)
   expect(codes.length).toBeGreaterThan(0)
   for (const c of codes) expect(c).toMatch(/^ups-/)
 })
 
 test("Nigeria stock → Mexico: DHL expedited only", async ({ page }) => {
-  await addFirstProduct(page, "lagos")
+  await addFixtureProduct(page, "lagos")
   const codes = await fillAddress(page, ADDRESSES.MX)
   expect(codes).toEqual(["expedited_rate"])
   await payWithTestCard(page, "expedited_rate")
 })
 
 test("declined test card shows an error and keeps the bag", async ({ page }) => {
-  await addFirstProduct(page, "houston")
+  await addFixtureProduct(page, "houston")
   await fillAddress(page, ADDRESSES.TX)
   await page.getByTestId("shipping-submit").click()
-  await page.getByTestId("test-payment-method").selectOption("pm_card_chargeDeclined")
+  const method = page.getByTestId("test-payment-method")
+  await method.selectOption("pm_card_chargeDeclined")
+  await expect(method).toHaveValue("pm_card_chargeDeclined")
   await page.getByTestId("test-payment-submit").click()
   await expect(page.getByTestId("checkout-message")).toContainText(/declined/i)
   await expect(page).toHaveURL(/\/checkout/)

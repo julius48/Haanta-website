@@ -742,6 +742,7 @@ textarea.s-input {
 
 .s-mega__card {
   position: relative;
+  display: block;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: var(--s-radius);
@@ -2266,6 +2267,7 @@ textarea.s-input {
   position: relative;
 }
 
+/* The visually hidden radio sits under its label; the label (for=) takes the click. */
 .s-option input {
   position: absolute;
   opacity: 0;
@@ -2273,6 +2275,10 @@ textarea.s-input {
   width: 100%;
   height: 100%;
   margin: 0;
+  pointer-events: none;
+}
+
+.s-option__label {
   cursor: pointer;
 }
 
@@ -2293,7 +2299,7 @@ textarea.s-input {
   transition: border-color 0.2s var(--s-ease), background 0.2s var(--s-ease), color 0.2s var(--s-ease);
 }
 
-.s-option input:hover + .s-option__label {
+.s-option input:not(:disabled) + .s-option__label:hover {
   border-color: var(--color-brand);
 }
 
@@ -3604,4 +3610,34 @@ textarea.s-input {
 
 .s-howto dd {
   margin: 2px 0 0;
+}
+
+/* Same box as next/image "fill" for single-source images */
+.s-img--fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Pagination numbers: 40px touch targets */
+.s-pagination ul {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.s-pagination li > a,
+.s-pagination__current {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  min-height: 40px;
+  padding-inline: var(--space-2);
+}
+
+/* Gallery thumbnails keep the photo's proportions */
+.s-gallery__thumb img {
+  object-fit: cover;
 }

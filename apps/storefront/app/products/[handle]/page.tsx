@@ -117,7 +117,7 @@ export default async function ProductPage({ params }: Props) {
             sku: product.variants?.[0]?.sku ?? null,
             price: price.amount,
             currency: price.currency || currency,
-            inStock: true,
+            inStock: slim.variants.some((v) => v.in_stock !== false),
             isPreorder: extras.is_preorder,
             rating: { average: reviews.average, count: reviews.count },
             returnWindowDays: settings.return_window_days,

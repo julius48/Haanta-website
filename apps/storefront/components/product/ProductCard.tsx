@@ -30,7 +30,7 @@ export function ProductCard({ doc, currency, saved, priority = false }: { doc: S
       <div className="s-card__media">
         <Link href={href} tabIndex={-1} aria-hidden="true" className="s-card__img-link">
           <ProductImage src={doc.images?.[0] ?? doc.thumbnail} alt="" sizes="(min-width: 1280px) 22vw, (min-width: 768px) 30vw, 50vw" priority={priority} />
-          {doc.images?.[1] ? <ProductImage src={doc.images[1]} alt="" sizes="(min-width: 1280px) 22vw, (min-width: 768px) 30vw, 50vw" className="s-card__alt" /> : null}
+          {doc.images?.[1] ? <ProductImage src={doc.images[1]} alt="" sizes="" lite className="s-card__alt" /> : null}
         </Link>
         {badges.length ? (
           <div className="s-card__badges">

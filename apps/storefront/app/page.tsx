@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { connection } from "next/server"
 import { ProductCard, ProductGrid } from "@/components/product/ProductCard"
@@ -90,7 +89,7 @@ export default async function HomePage() {
     <main id="main">
       <section className="s-hero" aria-labelledby="hero-title">
         <div className="s-hero__media">
-          <Image src={EDITORIAL.hero} alt="" fill priority sizes="100vw" />
+          <ProductImage src={EDITORIAL.hero} alt="" priority sizes="100vw" />
         </div>
         <div className="h-container s-hero__inner">
           <p className="s-hero__eyebrow">{home.hero.eyebrow}</p>
@@ -219,10 +218,9 @@ export default async function HomePage() {
 
       <section className="s-editorial" aria-labelledby="story-title">
         <div className="s-editorial__media">
-          <Image
+          <ProductImage
             src={EDITORIAL.adire}
             alt="Close-up of a hand-dyed adire dress"
-            fill
             sizes="(min-width: 900px) 50vw, 100vw"
           />
         </div>
@@ -262,10 +260,9 @@ export default async function HomePage() {
         aria-labelledby="occasion-title"
       >
         <div className="s-editorial__media">
-          <Image
+          <ProductImage
             src={EDITORIAL.pink}
             alt="Two women in tailored mini dresses"
-            fill
             sizes="(min-width: 900px) 50vw, 100vw"
           />
         </div>
@@ -336,10 +333,9 @@ export default async function HomePage() {
             {posts.slice(0, 3).map((p, i) => (
               <li key={p.slug} className="s-journal-card">
                 <span className="s-journal-card__media">
-                  <Image
+                  <ProductImage
                     src={p.coverImage ?? [EDITORIAL.adire, EDITORIAL.pink, EDITORIAL.hero][i % 3]!}
                     alt=""
-                    fill
                     sizes="(min-width: 800px) 32vw, 100vw"
                   />
                 </span>
