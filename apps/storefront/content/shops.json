@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "special-occasions",
+    "title": "Special Occasions",
+    "tagline": "Weddings, owambes and every celebration in between",
+    "description": "Statement gowns, rich aso-oke and hand-beaded pieces made to be remembered. Many are made to order to your measurements, so plan a few weeks ahead.",
+    "image": null
+  },
+  {
+    "slug": "elevated-essentials",
+    "title": "Elevated Essentials",
+    "tagline": "The pieces you reach for every day",
+    "description": "Clean lines, quality fabrics and quiet African detail. Wardrobe staples from our designers that work hard and last.",
+    "image": null
+  },
+  {
+    "slug": "casual-chic",
+    "title": "Casual Chic",
+    "tagline": "Easy, effortless, unmistakably African",
+    "description": "Relaxed sets, printed shirts and weekend dresses with a story stitched in.",
+    "image": null
+  },
+  {
+    "slug": "work-from-office",
+    "title": "Work From Office",
+    "tagline": "Boardroom ready, culture forward",
+    "description": "Tailored suits, structured tops and polished dresses that bring heritage into the office.",
+    "image": null
+  },
+  {
+    "slug": "bold-prints",
+    "title": "Bold Prints",
+    "tagline": "Ankara, adire and kente that speak for you",
+    "description": "Colour and pattern at full volume. Prints with meaning, from designers who know their history.",
+    "image": null
+  },
+  {
+    "slug": "vacay-bae",
+    "title": "Vacay Bae",
+    "tagline": "Sun-ready looks for the getaway",
+    "description": "Kaftans, beachwear and breezy sets for the beach, the boat and the rooftop.",
+    "image": null
+  }
+]

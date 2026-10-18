@@ -1,0 +1,31 @@
+# Haanta
+
+> Haanta is a curated marketplace for African fashion. Independent designers, mostly from Nigeria, are vetted by Haanta; every piece is checked and shipped to customers in the United States, Canada and Mexico. Prices for the US and Canada include import duties and taxes.
+
+Key facts:
+- Ships to: United States, Canada, Mexico.
+- Ships from: Haanta's hub in Houston, Texas (2-5 working days) or designers' studios in Nigeria (10-21 days standard, 2-3 days DHL Express).
+- Duties and taxes: included in US and Canada prices; no charges on delivery.
+- Free standard shipping on orders over $150.
+- Returns: 14 days after delivery for ready-to-wear pieces; made-to-order pieces are made to the customer's measurements.
+- Made to order: customers enter measurements when ordering; lead time is shown on each product page.
+- Payment: cards, Apple Pay, Google Pay, Link, Klarna and PayPal.
+
+## Shop
+
+- [All products](/shop): every in-stock piece with filters for category, designer, size, colour, price, origin and fulfilment.
+- [Women](/shop/women), [Men](/shop/men), [Accessories](/shop/accessories), [Beauty](/shop/beauty), [Home & Art](/shop/home)
+- [Curated shops](/shops): Special Occasions, Elevated Essentials, Casual Chic, Work From Office, Bold Prints, Vacay Bae.
+- [Designers A–Z](/brands): every designer with their story.
+
+## Help
+
+- [FAQs](/faq): shipping, duties, returns, sizing, made-to-order, pre-orders and payment.
+- [Shipping](/help/shipping)
+- [Returns](/help/returns)
+- [Track an order](/track)
+
+## About
+
+- [About Haanta](/about)
+- [Journal](/journal): stories from the studios.

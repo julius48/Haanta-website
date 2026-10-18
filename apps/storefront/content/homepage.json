@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "eyebrow": "Curated Africa",
+    "headline": "Style. Story. Soul.",
+    "subheadline": "Haanta is where Africa meets the world. Discover designers from Lagos to Accra, hand-picked for quality and shipped to your door in the US and Canada.",
+    "ctaLabel": "Shop new arrivals",
+    "ctaHref": "/shop?sort=newest",
+    "secondaryCtaLabel": "Meet the designers",
+    "secondaryCtaHref": "/brands"
+  },
+  "pillars": [
+    { "title": "Quality Assurance", "body": "Every brand is vetted and every piece checked at our Houston hub before it reaches you." },
+    { "title": "Culture and Heritage", "body": "Adire, aso-oke, kente and Ankara, told by the people who make them." },
+    { "title": "Empowerment", "body": "Designers keep their prices; we handle shipping, duties and customer care." },
+    { "title": "Community", "body": "A home for the diaspora and everyone who loves African design." }
+  ],
+  "brandSpotlights": [
+    {
+      "brandSlug": "adire-atelier-demo",
+      "name": "Adire Atelier",
+      "tagline": "Hand-dyed indigo from Abeokuta",
+      "story": "Resist-dyed by hand in small batches, each Adire piece carries patterns passed down through generations of Yoruba women.",
+      "region": "Lagos, Nigeria"
+    },
+    {
+      "brandSlug": "lekki-loom-demo",
+      "name": "Lekki Loom",
+      "tagline": "Aso-oke, reimagined for every day",
+      "story": "Woven on traditional looms and cut into easy, modern shapes: shirts and jackets you will reach for again and again.",
+      "region": "Lagos, Nigeria"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+[
+  { "id": "free-shipping", "placement": "announcement", "message": "Free standard shipping on orders over $150. Duties and taxes included.", "href": "/help/shipping" },
+  { "id": "ships-from-us", "placement": "home", "message": "In a hurry? Shop pieces already in our Houston hub: 2-5 working days.", "href": "/shop?ships_from=houston" }
+]

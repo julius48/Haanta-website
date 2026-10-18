@@ -144,6 +144,22 @@ export function transformCatalog(rows: Record<string, string>[], opts: Transform
   const skipped: TransformResult["skipped"] = []
   const vendors = new Map<string, BrandDef>()
   const handles = new Set<string>()
+  // Wix SKUs are not unique per variant (one SKU is often shared by every size). Medusa needs unique
+  // SKUs, so the first use keeps the Wix SKU and later uses get the variant options appended.
+  const skus = new Set<string>()
+  const uniqueSku = (raw: string | null, variantTitle: string): { sku: string | null; renamed: boolean } => {
+    if (!raw) return { sku: null, renamed: false }
+    const base = raw.trim().toUpperCase().replace(/[^A-Z0-9._-]/g, "-").slice(0, 40)
+    if (!skus.has(base)) {
+      skus.add(base)
+      return { sku: base, renamed: false }
+    }
+    const suffix = variantTitle.toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 20) || "V"
+    let candidate = `${base}-${suffix}`.slice(0, 64)
+    for (let n = 2; skus.has(candidate); n++) candidate = `${base}-${suffix}-${n}`.slice(0, 64)
+    skus.add(candidate)
+    return { sku: candidate, renamed: true }
+  }
   const stats: Record<string, number> = { products_in_export: groups.length, variants_in_export: 0 }
   const note = (p: Record<string, string>, severity: ReviewSeverity, issue: string, detail: string) =>
     review.push({ handle_id: p.handleId ?? "", name: p.name ?? "", severity, issue, detail })
@@ -200,6 +216,7 @@ export function transformCatalog(rows: Record<string, string>[], opts: Transform
     const variants: MigratedVariant[] = []
     let missingWeight = 0
     let derived = 0
+    let renamedSkus = 0
     for (const v of variantRows) {
       const values: Record<string, string> = {}
       let mto = false
@@ -224,9 +241,12 @@ export function transformCatalog(rows: Record<string, string>[], opts: Transform
       const weight = parseWeightKg(v === p ? p.weight : v.weight)
       if (!weight) missingWeight++
       const inv = parseWixInventory(v.inventory ?? p.inventory)
+      const variantTitle = Object.values(values).join(" / ")
+      const { sku, renamed } = uniqueSku((v === p ? "" : v.sku)?.trim() || null, variantTitle)
+      if (renamed) renamedSkus++
       variants.push({
-        title: Object.values(values).join(" / "),
-        sku: (v === p ? "" : v.sku)?.trim() || null,
+        title: variantTitle,
+        sku,
         options: values,
         vendor_price_minor: vendorPrice,
         vendor_price_source: cost && cost > 0 ? "cost" : "derived",
@@ -242,6 +262,7 @@ export function transformCatalog(rows: Record<string, string>[], opts: Transform
       skipped.push({ wix_handle_id: p.handleId!, wix_slug: wixSlugs[gi]!, name: p.name! })
       return
     }
+    if (renamedSkus) note(p, "info", "sku_renamed", `${renamedSkus} variant SKU(s) were shared with other variants in Wix and were made unique`)
     if (missingWeight) note(p, "info", "missing_weight", `${missingWeight} variant(s) without weight: shipping uses the 1.5 kg default and the product is flagged in Catalog health`)
     if (derived) note(p, "info", "vendor_price_derived", `${derived} variant(s) had no cost; vendor price derived from the Wix price ÷ (1 + markup). Confirm with the vendor.`)
     const changed = variants.filter((v) => Math.abs(opts.retailFor(v.vendor_price_minor, markupBps) - v.wix_price_minor) >= 100)

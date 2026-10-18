@@ -58,6 +58,12 @@ describe("Wix catalog export transform", () => {
     }
   })
 
+  it("makes every variant SKU unique (Wix shares SKUs across sizes)", () => {
+    const all = result.products.flatMap((p) => p.variants.map((v) => v.sku)).filter((s): s is string => !!s)
+    expect(new Set(all).size).toBe(all.length)
+    expect(all.every((s) => /^[A-Z0-9._-]{1,64}$/.test(s))).toBe(true)
+  })
+
   it("sanitises description HTML", () => {
     for (const p of result.products) expect(p.description).not.toMatch(/<script|onerror|javascript:/i)
   })

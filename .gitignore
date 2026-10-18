@@ -19,3 +19,6 @@ migration-output/
 *.log
 .DS_Store
 .vercel
+
+# Local-dev upload storage (Medusa local file provider)
+apps/backend/static/

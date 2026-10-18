@@ -3,7 +3,7 @@
  *
  *   pnpm --filter @haanta/backend import:catalog dry-run           # review only, no writes
  *   pnpm --filter @haanta/backend import:catalog                   # import (idempotent; re-runs update)
- *   options: file=<csv> limit=<n> out=<dir>
+ *   options: file=<csv> limit=<n> out=<dir> only-new (skip products that already exist)
  *
  * Writes <out>/review.csv (rows it could not map or that need a human), <out>/summary.json,
  * <out>/redirects.csv and, on a real run, apps/storefront/redirects.json (301s from every Wix URL).
@@ -33,6 +33,8 @@ function arg(args: string[], name: string): string | undefined {
 export default async function importCatalog({ container, args = [] }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const dryRun = args.includes("dry-run")
+  /** Skip products that already exist (faster re-run after fixing failures). */
+  const onlyNew = args.includes("only-new")
   const repo = resolve(process.cwd(), "..", "..")
   const file = resolve(arg(args, "file") ?? join(repo, "docs", "catalog-export.csv"))
   const outDir = resolve(arg(args, "out") ?? join(process.cwd(), "migration-output"))
@@ -94,6 +96,7 @@ export default async function importCatalog({ container, args = [] }: ExecArgs) 
     try {
       const vendorId = vendorIds.get(p.vendor.slug)!
       const { data: existing } = await query.graph({ entity: "product", fields: ["id"], filters: { handle: p.handle } })
+      if (existing.length && onlyNew) continue
       const images: string[] = []
       for (const url of p.images) images.push(await mirror.mirror(url, `vendors/${vendorId}/product`))
       const snapshot: ListingSnapshot = {

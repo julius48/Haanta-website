@@ -17,6 +17,8 @@ export interface SearchDocument {
   title: string
   description: string
   thumbnail: string | null
+  /** First few product images (cards show the second on hover). */
+  images: string[]
   vendor: { id: string; name: string; slug: string; region: string | null }
   categories: string[]
   category_names: string[]
@@ -86,8 +88,27 @@ export function invalidateSearchCache() {
   cache = null
 }
 
+let rebuilding: Promise<SearchDocument[]> | null = null
+
+/**
+ * Stale-while-revalidate: once built, the index is always served from memory instantly and rebuilt
+ * in the background when older than TTL_MS, so shoppers never wait for a rebuild.
+ */
 export async function buildDocuments(container: MedusaContainer): Promise<SearchDocument[]> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.docs
+  if (cache) {
+    rebuilding ??= rebuildDocuments(container).finally(() => {
+      rebuilding = null
+    })
+    return cache.docs
+  }
+  rebuilding ??= rebuildDocuments(container).finally(() => {
+    rebuilding = null
+  })
+  return rebuilding
+}
+
+async function rebuildDocuments(container: MedusaContainer): Promise<SearchDocument[]> {
   const query = container.resolve<Query>(ContainerRegistrationKeys.QUERY)
   const marketplace = container.resolve<MarketplaceService>(MARKETPLACE_MODULE)
   const [{ data: products }, attrs, pricing, vendors, snaps] = await Promise.all([
@@ -99,6 +120,8 @@ export async function buildDocuments(container: MedusaContainer): Promise<Search
         "title",
         "description",
         "thumbnail",
+        "images.url",
+        "images.rank",
         "created_at",
         "status",
         "metadata",
@@ -146,6 +169,11 @@ export async function buildDocuments(container: MedusaContainer): Promise<Search
       title: p.title as string,
       description: htmlToText(p.description as string | null, 400),
       thumbnail: (p.thumbnail as string | null) ?? null,
+      images: ((p.images as { url: string; rank?: number }[] | undefined) ?? [])
+        .slice()
+        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+        .map((i) => i.url)
+        .slice(0, 4),
       vendor: { id: vendor.id, name: vendor.name, slug: vendor.slug, region: vendor.region ?? null },
       categories: cats.flatMap((c) => {
         const path = c.metadata?.path ?? c.handle
