@@ -8,7 +8,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { htmlToText } from "@haanta/core"
 import { MARKETPLACE_MODULE, type MarketplaceService } from "../modules/marketplace"
-import { isFixtureVendor } from "./fixtures"
+import { isFixtureProduct } from "./fixtures"
 
 type Query = { graph: (q: Record<string, unknown>) => Promise<{ data: Record<string, unknown>[] }> }
 
@@ -190,7 +190,7 @@ async function rebuildDocuments(container: MedusaContainer): Promise<SearchDocum
   for (const p of products) {
     const a = attrsByProduct.get(p.id as string)
     const vendor = a ? vendorById.get(a.vendor_id) : undefined
-    if (!a || !vendor || isFixtureVendor(vendor.slug)) continue
+    if (!a || !vendor || isFixtureProduct(p.handle as string)) continue
     const variants = (p.variants as Record<string, unknown>[] | undefined) ?? []
     const vp = pricingByProduct.get(p.id as string) ?? []
     if (!vp.length) continue

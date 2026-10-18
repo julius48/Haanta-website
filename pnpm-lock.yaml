@@ -63,6 +63,9 @@ importers:
       pdfkit:
         specifier: ^0.17.2
         version: 0.17.2
+      qrcode:
+        specifier: 1.5.4
+        version: 1.5.4
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -100,6 +103,9 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.3
         version: 0.17.6
+      '@types/qrcode':
+        specifier: 1.5.6
+        version: 1.5.6
       '@types/react':
         specifier: ^18.3.23
         version: 18.3.31
