@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { getStripe } from "../../../../../lib/stripe-client"
+import { getStripe, MOCK_PAYMENT_METHODS } from "../../../../../lib/stripe-client"
 import { getPayPal } from "../../../../../lib/paypal-client"
 
 /**
@@ -15,7 +15,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
   const body = (req.body ?? {}) as { payment_intent_id?: unknown; payment_method?: unknown; paypal_order_id?: unknown }
   if (typeof body.payment_intent_id === "string" && /^pi_mock_[a-f0-9]{16}$/.test(body.payment_intent_id) && stripe.mockConfirm) {
-    const pm = typeof body.payment_method === "string" && /^pm_[A-Za-z]{2,40}$/.test(body.payment_method) ? body.payment_method : "pm_card_visa"
+    // Unknown methods are refused (never silently treated as a successful card).
+    const pm = body.payment_method === undefined ? "pm_card_visa" : body.payment_method
+    if (typeof pm !== "string" || !MOCK_PAYMENT_METHODS.includes(pm)) {
+      res.status(400).json({ message: "Unknown test payment method" })
+      return
+    }
     const pi = stripe.mockConfirm(body.payment_intent_id, pm)
     res.json({ status: pi.status })
     return

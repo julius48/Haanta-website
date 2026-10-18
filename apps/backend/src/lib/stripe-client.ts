@@ -105,6 +105,9 @@ const MOCK_OUTCOMES: Record<string, { status: PaymentIntentLite["status"]; risk:
   pm_klarna: { status: "processing", risk: "normal" },
 }
 
+/** Test payment method ids the mock understands. */
+export const MOCK_PAYMENT_METHODS: readonly string[] = Object.keys(MOCK_OUTCOMES)
+
 function createMockStripe(): StripeLike {
   const intents = new Map<string, PaymentIntentLite>()
   const get = (id: string) => {
@@ -151,7 +154,8 @@ function createMockStripe(): StripeLike {
     },
     mockConfirm(id, paymentMethod) {
       const pi = get(id)
-      const outcome = MOCK_OUTCOMES[paymentMethod] ?? MOCK_OUTCOMES.pm_card_visa!
+      const outcome = MOCK_OUTCOMES[paymentMethod]
+      if (!outcome) throw new Error(`Unknown test payment method: ${paymentMethod}`)
       pi.status = outcome.status
       pi.latest_charge = { id: `ch_mock_${randomBytes(6).toString("hex")}`, outcome: { risk_level: outcome.risk, risk_score: outcome.risk === "elevated" ? 70 : outcome.risk === "highest" ? 90 : 20 } }
       return { ...pi }

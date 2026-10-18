@@ -32,8 +32,20 @@ export function csrfOriginCheck(req: MedusaRequest, res: MedusaResponse, next: M
   res.status(403).json({ type: "not_allowed", code: "csrf_origin", message: "Cross-site request blocked" })
 }
 
-export function rateLimit(rule: RateLimitRule, key: (req: MedusaRequest) => string = (req) => clientIp(req)) {
+/**
+ * Local e2e suites drive many checkouts from one IP within a minute. RATE_LIMIT_SCALE (e.g. 20)
+ * multiplies every limit for such runs; it is ignored in production (and in tests) so live limits never weaken.
+ */
+export function effectiveRule(rule: RateLimitRule, env: NodeJS.ProcessEnv = process.env): RateLimitRule {
+  const scale = Number(env.RATE_LIMIT_SCALE)
+  // Never in production, and never under the test runner (integration tests assert the real limits).
+  if (env.NODE_ENV === "production" || env.TEST_TYPE || !Number.isFinite(scale) || scale <= 1) return rule
+  return { ...rule, limit: Math.floor(rule.limit * scale) }
+}
+
+export function rateLimit(baseRule: RateLimitRule, key: (req: MedusaRequest) => string = (req) => clientIp(req)) {
   return async (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+    const rule = effectiveRule(baseRule)
     const r = await hitRateLimit(getCounterStore(), rule, key(req))
     res.setHeader("RateLimit-Limit", String(rule.limit))
     res.setHeader("RateLimit-Remaining", String(r.remaining))

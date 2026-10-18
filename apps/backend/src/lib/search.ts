@@ -4,10 +4,11 @@
  *   - AlgoliaSearch: used when ALGOLIA_APP_ID / ALGOLIA_ADMIN_KEY are set (REST, no SDK).
  * Facets are disjunctive: each facet's counts ignore its own filter.
  */
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { htmlToText } from "@haanta/core"
 import { MARKETPLACE_MODULE, type MarketplaceService } from "../modules/marketplace"
+import { isFixtureVendor } from "./fixtures"
 
 type Query = { graph: (q: Record<string, unknown>) => Promise<{ data: Record<string, unknown>[] }> }
 
@@ -82,7 +83,8 @@ const NEW_DAYS = 30
 // ---------------------------------------------------------------- document building
 
 let cache: { at: number; docs: SearchDocument[] } | null = null
-const TTL_MS = 60_000
+// Events (product and order changes) trigger rebuilds; this is only a staleness backstop.
+const TTL_MS = 15 * 60_000
 
 export function invalidateSearchCache() {
   cache = null
@@ -108,36 +110,72 @@ export async function buildDocuments(container: MedusaContainer): Promise<Search
   return rebuilding
 }
 
+const PAGE = 200
+const PRODUCT_FIELDS = [
+  "id",
+  "handle",
+  "title",
+  "description",
+  "thumbnail",
+  "images.url",
+  "images.rank",
+  "created_at",
+  "status",
+  "metadata",
+  "categories.handle",
+  "categories.name",
+  "categories.metadata",
+  "variants.id",
+  "variants.manage_inventory",
+  "variants.metadata",
+  // Product-level option values (sizes, colours): ~6x cheaper than variants.options.option.title.
+  "options.title",
+  "options.values.value",
+]
+
+/** Published products, fetched in pages so the event loop yields between pages (no long stalls). */
+async function publishedProducts(query: Query): Promise<Record<string, unknown>[]> {
+  const out: Record<string, unknown>[] = []
+  for (let skip = 0; ; skip += PAGE) {
+    const { data } = await query.graph({ entity: "product", fields: PRODUCT_FIELDS, filters: { status: "published" }, pagination: { skip, take: PAGE, order: { id: "ASC" } } })
+    out.push(...(data as Record<string, unknown>[]))
+    if (data.length < PAGE) return out
+  }
+}
+
+/** Units available per variant (stocked minus reserved, across locations), from two flat queries. */
+async function availableByVariant(container: MedusaContainer, query: Query): Promise<Map<string, number>> {
+  const [{ data: links }, levels] = await Promise.all([
+    query.graph({ entity: "product_variant_inventory_item", fields: ["variant_id", "inventory_item_id"] }),
+    container.resolve(Modules.INVENTORY).listInventoryLevels({}, { take: null, select: ["inventory_item_id", "stocked_quantity", "reserved_quantity"] }),
+  ])
+  const perItem = new Map<string, number>()
+  for (const l of levels) perItem.set(l.inventory_item_id, (perItem.get(l.inventory_item_id) ?? 0) + Number(l.stocked_quantity) - Number(l.reserved_quantity))
+  const perVariant = new Map<string, number>()
+  for (const link of links as { variant_id: string; inventory_item_id: string }[]) {
+    perVariant.set(link.variant_id, (perVariant.get(link.variant_id) ?? 0) + (perItem.get(link.inventory_item_id) ?? 0))
+  }
+  return perVariant
+}
+
+function groupBy<T>(rows: T[], key: (r: T) => string | null | undefined): Map<string, T[]> {
+  const m = new Map<string, T[]>()
+  for (const r of rows) {
+    const k = key(r)
+    if (!k) continue
+    const list = m.get(k)
+    if (list) list.push(r)
+    else m.set(k, [r])
+  }
+  return m
+}
+
 async function rebuildDocuments(container: MedusaContainer): Promise<SearchDocument[]> {
   const query = container.resolve<Query>(ContainerRegistrationKeys.QUERY)
   const marketplace = container.resolve<MarketplaceService>(MARKETPLACE_MODULE)
-  const [{ data: products }, attrs, pricing, vendors, snaps] = await Promise.all([
-    query.graph({
-      entity: "product",
-      fields: [
-        "id",
-        "handle",
-        "title",
-        "description",
-        "thumbnail",
-        "images.url",
-        "images.rank",
-        "created_at",
-        "status",
-        "metadata",
-        "categories.handle",
-        "categories.name",
-        "categories.metadata",
-        "variants.id",
-        "variants.manage_inventory",
-        "variants.metadata",
-        "variants.options.value",
-        "variants.options.option.title",
-        "variants.inventory_items.inventory.location_levels.stocked_quantity",
-        "variants.inventory_items.inventory.location_levels.reserved_quantity",
-      ],
-      filters: { status: "published" },
-    }),
+  const [products, available, attrs, pricing, vendors, snaps] = await Promise.all([
+    publishedProducts(query),
+    availableByVariant(container, query),
     marketplace.listProductAttributes({}, { take: null }),
     marketplace.listVariantPricings({}, { take: null }),
     marketplace.listVendors({ status: "active" }, { take: null }),
@@ -145,21 +183,20 @@ async function rebuildDocuments(container: MedusaContainer): Promise<SearchDocum
   ])
   const sold = new Map<string, number>()
   for (const s of snaps) if (s.product_id) sold.set(s.product_id, (sold.get(s.product_id) ?? 0) + Number(s.quantity))
+  const attrsByProduct = new Map(attrs.map((a) => [a.product_id, a]))
+  const vendorById = new Map(vendors.map((v) => [v.id, v]))
+  const pricingByProduct = groupBy(pricing, (x) => x.product_id)
   const docs: SearchDocument[] = []
   for (const p of products) {
-    const a = attrs.find((x) => x.product_id === p.id)
-    const vendor = vendors.find((v) => v.id === a?.vendor_id)
-    if (!a || !vendor) continue
+    const a = attrsByProduct.get(p.id as string)
+    const vendor = a ? vendorById.get(a.vendor_id) : undefined
+    if (!a || !vendor || isFixtureVendor(vendor.slug)) continue
     const variants = (p.variants as Record<string, unknown>[] | undefined) ?? []
-    const vp = pricing.filter((x) => x.product_id === p.id)
+    const vp = pricingByProduct.get(p.id as string) ?? []
     if (!vp.length) continue
-    const opt = (title: RegExp) =>
-      [...new Set(variants.flatMap((v) => ((v.options as { value: string; option?: { title?: string } }[] | undefined) ?? []).filter((o) => title.test(o.option?.title ?? "")).map((o) => o.value)))]
-    const inStock = variants.some((v) => {
-      if (!v.manage_inventory) return true
-      const levels = ((v.inventory_items as { inventory?: { location_levels?: { stocked_quantity: number; reserved_quantity: number }[] } }[] | undefined) ?? []).flatMap((i) => i.inventory?.location_levels ?? [])
-      return levels.reduce((n, l) => n + Number(l.stocked_quantity) - Number(l.reserved_quantity), 0) > 0
-    })
+    const options = (p.options as { title?: string; values?: { value: string }[] }[] | undefined) ?? []
+    const opt = (title: RegExp) => [...new Set(options.filter((o) => title.test(o.title ?? "")).flatMap((o) => (o.values ?? []).map((v) => v.value)))]
+    const inStock = variants.some((v) => !v.manage_inventory || (available.get(v.id as string) ?? 0) > 0)
     const compare = variants.map((v) => Number((v.metadata as Record<string, unknown> | null)?.compare_at_usd_minor ?? 0)).filter((x) => x > 0)
     const minUsd = Math.min(...vp.map((x) => x.retail_usd_minor)) / 100
     const cats = (p.categories as { handle: string; name: string; metadata?: { path?: string } | null }[] | undefined) ?? []
@@ -344,4 +381,40 @@ export function getSearch(container: MedusaContainer): SearchAdapter {
   const { ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX, TEST_TYPE } = process.env
   if (ALGOLIA_APP_ID && ALGOLIA_ADMIN_KEY && !TEST_TYPE) return createAlgoliaSearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, ALGOLIA_INDEX || "haanta_products")
   return createLocalSearch(container)
+}
+
+/**
+ * Rebuild the documents now (single flight with request-triggered rebuilds) and, when Algolia is
+ * configured, push them to the external index. Run on a schedule so shoppers never pay for a rebuild.
+ */
+export async function refreshSearchIndex(container: MedusaContainer): Promise<number> {
+  rebuilding ??= rebuildDocuments(container).finally(() => {
+    rebuilding = null
+  })
+  const docs = await rebuilding
+  const { ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY, TEST_TYPE } = process.env
+  if (ALGOLIA_APP_ID && ALGOLIA_ADMIN_KEY && !TEST_TYPE) await getSearch(container).index(docs)
+  return docs.length
+}
+
+let pending: ReturnType<typeof setTimeout> | null = null
+
+/**
+ * Debounced rebuild after catalog or stock changes: a burst of events (e.g. a catalog import or a
+ * vendor saving many variants) collapses into one rebuild a few seconds after the last event.
+ */
+export function scheduleSearchRefresh(container: MedusaContainer, delayMs = 5_000): void {
+  if (pending) clearTimeout(pending)
+  pending = setTimeout(() => {
+    pending = null
+    const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+    const started = Date.now()
+    refreshSearchIndex(container).then(
+      (count) => logger.info(`[search] index refreshed after catalog/stock change: ${count} products in ${Date.now() - started} ms`),
+      (e: unknown) => {
+        logger.error(`[search] refresh failed: ${e instanceof Error ? e.message : String(e)}`)
+      },
+    )
+  }, delayMs)
+  pending.unref?.()
 }
