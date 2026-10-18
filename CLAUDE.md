@@ -5,6 +5,17 @@ Buyers: US and Canada (Mexico supported). Vendors: mostly Nigeria; some stock in
 Status and progress: `docs/BUILD_REPORT.md`. Business/technical decisions: `docs/decisions.md`.
 API contract: `docs/api.md`.
 
+## Current priority (owner, 2026-10-18)
+
+Storefront first (premium, editorial UI: Onuli/Adjoaa storytelling + ASOS browsing), then Medusa backend work, then admin pages.
+
+## Storefront design bar
+
+- Editorial luxury, not a template: generous whitespace, full-bleed imagery, Cinzel only for marketing headlines.
+- No underlined links outside body copy; single-row header; image-led shops and brand stories.
+- Dialogs never block first view (cookie notice is a small card; newsletter popup only after engagement).
+- Verify every page visually (desktop and mobile screenshots) before calling it done.
+
 ## Layout
 
 | Path | What |

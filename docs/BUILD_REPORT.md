@@ -2,7 +2,7 @@
 
 > **Status: IN PROGRESS.** This file is the live checkpoint. It becomes the final report (how to run,
 > test results, decisions, gaps, security review, go-live needs) when the build completes.
-> Last updated: 2026-10-17.
+> Last updated: 2026-10-18.
 
 ## Stage status
 
@@ -10,9 +10,9 @@
 |---|---|---|
 | 1. Foundations | Partly done | Monorepo, shared config, tokens, local Postgres, Medusa + both Next apps running, auth/roles/MFA on the API. **Missing:** CI workflows, docker-compose file, README, admin MFA screen. |
 | 2. Shipping + pricing engines | Done | 70 shipping tests, 16 pricing tests; wired into Medusa (fulfilment provider + server-side pricing). |
-| 3. Catalog migration | Not started | Mapping rules exist and are tested (`packages/core/src/catalog/mapping.ts`); import script, dry run, review CSV and redirect map not yet written. |
-| 4. Storefront | Not started (scaffold only) | Agent stopped at the usage limit after writing helper files in `apps/storefront/lib`. |
-| 5. Vendor portal + review queue | API done, UI not started | Vendor API and admin review-queue API done; portal pages not built (helpers only in `apps/vendor/lib`). |
+| 3. Catalog migration | Done (code) | Transform tested on the real export: 1,280/1,370 products mapped, 90 without any brand reported; per-vendor markups derived from Wix price/cost; dry run writes review CSV + redirect map; idempotent import. |
+| 4. Storefront | In progress (redesign) | First pass built by a subagent works end to end but looks generic; being redesigned. |
+| 5. Vendor portal + review queue | Portal done; admin queue UI pending | Vendor portal built (22 routes, 29 unit tests, axe scans clean); review-queue API done and tested. |
 | 6. Ledger, payouts, admin dashboard | API done, UI not started | Ledger/payout/reconciliation/dashboard APIs done; Medusa admin extensions not built. |
 | 7. Launch readiness | Not started | |
 
@@ -39,11 +39,10 @@
 | Refund could move money before the ledger rejected an over-refund | Remaining quantity checked before refunding |
 | PII guard blocked vendor order views: the hub address's `address_1`/`phone` keys matched the buyer-PII key list (false positive; no buyer data present) | Key checks skip `ship_to` (Haanta's hub, from settings); buyer values are still checked everywhere |
 
-## Next steps (in order)
+## Next steps (in order, per owner priority on 2026-10-18)
 
-1. Upload signing integration test.
-2. Storefront and vendor portal pages (resume the two agents).
-3. Admin extensions (dashboard, review queue, payouts, settings, audit, MFA screen).
-4. Catalog migration with dry run, review CSV and redirect map.
-5. CI (GitHub Actions + gitleaks, audit, CodeQL, Dependabot), docker-compose, README.
-6. Launch readiness: Lighthouse/axe budgets, security review, checkout load test, backup/restore, runbook, cutover plan.
+1. **Storefront first**, redesigned to a premium editorial standard (owner feedback: the first version looked generic). Owned directly, not delegated. Import the real catalog locally so pages show real products and photos.
+2. **Then Medusa backend work**: password-reset emails done; remaining: upload signing test, full integration run, search indexing, jobs.
+3. **Then the admin pages** (Medusa admin extensions: dashboard, review queue, payouts, settings, audit, MFA screen).
+4. CI (GitHub Actions + gitleaks, audit, CodeQL, Dependabot), docker-compose, README.
+5. Launch readiness: Lighthouse/axe budgets, security review, checkout load test, backup/restore, runbook, cutover plan.
