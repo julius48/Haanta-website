@@ -1,0 +1,21 @@
+# Vercel CLI uploads from the repo root (monorepo); keep secrets and local artefacts out.
+.env*
+!.env.example
+**/.env*
+!**/.env.example
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/.medusa
+**/test-results
+**/playwright-report
+.dev-db
+.pg-data
+**/.turbo
+tmp
+migration-output
+.lighthouseci
+apps/backend/static
+*.tsbuildinfo
+*.log
