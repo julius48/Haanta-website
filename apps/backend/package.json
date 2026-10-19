@@ -7,6 +7,8 @@
     "build": "medusa build",
     "dev": "medusa develop",
     "start": "medusa start",
+    "start:prod": "cd .medusa/server && medusa start",
+    "migrate:prod": "cd .medusa/server && medusa db:migrate",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "migrate": "medusa db:migrate",
     "import:catalog": "medusa exec ./src/scripts/import-catalog.ts",

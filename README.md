@@ -71,7 +71,7 @@ cd apps/storefront && npx playwright test   # end-to-end (needs storefront + bac
 ## Deploying
 
 Vercel only hosts the two Next.js apps. The Medusa backend needs a long-running server and a Postgres database (for example Railway + Neon).
-The storefront's build config for Vercel is in `apps/storefront/vercel.json`; it builds the shared packages first.
+Step-by-step guide: [docs/deploy.md](docs/deploy.md). Each Next.js app has a `vercel.json` that builds the shared packages first.
 
 ## What to do next
 
@@ -81,7 +81,7 @@ The storefront's build config for Vercel is in `apps/storefront/vercel.json`; it
    - `MEDUSA_BACKEND_URL` and `NEXT_PUBLIC_MEDUSA_BACKEND_URL`: the hosted backend URL
    - `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`: from the production seed
    - `NEXT_PUBLIC_SITE_URL`: the Vercel URL (later `https://www.haanta.com`)
-4. **Import the vendor portal** the same way, as a second Vercel project with Root Directory `apps/vendor` and the variables from `apps/vendor/.env.example`. It needs the same monorepo `vercel.json` setup as the storefront.
+4. **Import the vendor portal** the same way, as a second Vercel project with Root Directory `apps/vendor` and the variables from `apps/vendor/.env.example`.
 5. **Check the preview.** Open the site on desktop and mobile: browse, search, add to cart, and run a checkout against the mock payments.
 6. **Add real services one at a time.** Add the real keys one service at a time: Stripe and PayPal (sandbox first), UPS/ShipEngine, Algolia, Cloudinary, Klaviyo, Sentry and Cloudflare Turnstile. Every service without a key keeps running on its mock, so the site works as staging until then.
 7. **Go live.** When everything is checked, add `www.haanta.com` as a domain in Vercel and switch DNS away from Wix. The legacy Wix redirects are already handled by the storefront.
