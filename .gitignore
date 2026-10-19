@@ -22,3 +22,4 @@ migration-output/
 
 # Local-dev upload storage (Medusa local file provider)
 apps/backend/static/
+.neon
