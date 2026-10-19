@@ -106,9 +106,14 @@ node -e "const c=require('crypto');for(const [n,b] of [['JWT_SECRET',48],['COOKI
 
 ### 3b. Give it a web address
 
-1. Click the box (the "service") that appeared in your project.
-2. Open the **Settings** tab.
-3. Scroll to **Networking** and click **Generate Domain**. If it asks for a port, type `9000`.
+1. On the project page (the big canvas with dotted background), **click the box** (the "service") named after the repo,
+   e.g. **Haanta-website**. A panel slides open on the right.
+   - **No box at all?** Railway couldn't read the repo: click **+ Create** (or **+ New**) → **GitHub Repo** → **Configure GitHub App**, allow **Haanta-website**, then pick it.
+   - **Several boxes** (e.g. one per app)? Railway split the monorepo up. Keep one, and delete the others: click each extra box → **Settings** → scroll to the bottom → **Delete service**.
+2. At the top of that right-hand panel, click the **Settings** tab (next to Deployments, Variables, Metrics).
+3. Scroll down to the section **Networking**, sub-heading **Public Networking**. Click **Generate Domain**.
+   If it asks for a port, type `9000` and confirm.
+   (Can't spot it? Press **Ctrl + F** in the browser and search the page for "Generate Domain".)
 4. Copy the address it shows (like `haanta-website-production.up.railway.app`).
 5. In your notes, write it as **BACKEND ADDRESS** with `https://` in front:
    `https://haanta-website-production.up.railway.app`
@@ -128,14 +133,16 @@ Still in **Settings**, find each field below and paste the value exactly. (Railw
 
 ### 3d. Add the settings (variables)
 
-1. Open the **Variables** tab.
-2. Click **Raw Editor**.
-3. Copy the block below into Notepad first and replace each `<...>` with your values:
-   - `<DATABASE ADDRESS>` → from Step 1
-   - `<BACKEND ADDRESS>` → from Step 3b, **including** `https://`
-   - the `<from Step 2>` lines → your 7 secret lines (paste them over these 7 lines)
-   - `<ADMIN EMAIL>` / `<ADMIN PASSWORD>` → from Step 2
-   - Leave the `PUT-STOREFRONT-ADDRESS-HERE` and `PUT-VENDOR-ADDRESS-HERE` parts as they are for now. You'll fix them in Step 6.
+**What this does:** the backend needs to know a few things before it can start: where the database is,
+what its own web address is, which websites may talk to it, and its secret keys.
+You give it this information as **variables**: one per line, written `NAME=value`.
+
+You'll do it in three small parts: **(A)** prepare the text in Notepad, **(B)** fill in your values, **(C)** paste it into Railway.
+
+#### A. Copy the template into Notepad
+
+1. Open **Notepad** (a new, empty window).
+2. Copy the whole grey block below (the copy icon in its top-right corner) and paste it into Notepad.
 
 ```env
 NODE_ENV=production
@@ -170,8 +177,56 @@ SEED_ADMIN_EMAIL=<ADMIN EMAIL>
 SEED_ADMIN_PASSWORD=<ADMIN PASSWORD>
 ```
 
-4. Paste the filled-in block into the Raw Editor and click **Update Variables**.
-5. Railway shows a button to **Deploy** the changes. Click it.
+#### B. Fill in your values
+
+In Notepad, replace each placeholder in `<angle brackets>` (the brackets go too) with the value from your notes.
+Use **Edit → Replace** in Notepad to change all copies of a placeholder at once.
+
+| Replace this | With | Where to find it |
+|---|---|---|
+| `<DATABASE ADDRESS>` | the long address starting `postgresql://` | Your notes from Step 1. (If Claude set up Neon for you, it's in the file `.env.local` in the Haanta folder: copy what's **between** the quotes.) |
+| `<BACKEND ADDRESS>` | your Railway address, **with** `https://` in front and **no** `/` at the end | Your notes from Step 3b |
+| the 7 lines ending `=<from Step 2>` | your 7 secret lines | Delete these 7 lines and paste your 7 lines from Step 2 in their place |
+| `<ADMIN EMAIL>` | your email | Your notes from Step 2 |
+| `<ADMIN PASSWORD>` | your admin password | Your notes from Step 2 |
+
+**Don't touch** the lines with `PUT-STOREFRONT-ADDRESS-HERE` and `PUT-VENDOR-ADDRESS-HERE`. Those websites don't exist yet; you'll fill them in at Step 7.
+Also leave the first block (`NODE_ENV=production` … `FX_PROVIDER=fixed`) exactly as it is.
+
+**Example.** If your Railway address is `haanta-backend-production.up.railway.app`, these lines:
+
+```env
+MEDUSA_BACKEND_URL=<BACKEND ADDRESS>
+ADMIN_URL=<BACKEND ADDRESS>/app
+```
+
+become:
+
+```env
+MEDUSA_BACKEND_URL=https://haanta-backend-production.up.railway.app
+ADMIN_URL=https://haanta-backend-production.up.railway.app/app
+```
+
+**Before moving on, check:**
+
+- [ ] Search Notepad for `<`. There should be **no** `<` or `>` left anywhere.
+- [ ] There are **no spaces** around any `=` sign, and no spaces inside the values.
+- [ ] Each variable is on **one line** (the database address is long, but it must not be split).
+- [ ] Every address starts with `https://`, except the database one, which starts with `postgresql://`.
+
+#### C. Paste it into Railway
+
+1. In Railway, click your **haanta-backend** box, then open the **Variables** tab (next to Settings).
+2. Click **Raw Editor** (top right of the Variables tab). A big text box opens.
+3. If the box already has text in it, select it all (**Ctrl + A**) and delete it.
+4. Go to Notepad, select all (**Ctrl + A**), copy (**Ctrl + C**), and paste (**Ctrl + V**) into Railway's text box.
+5. Click **Update Variables**.
+6. A purple bar appears at the top of the page saying there are changes to apply. Click **Deploy** (or **Apply changes**).
+
+✅ **You should now see** about 25 variables listed in the Variables tab, and a new deployment starting in the **Deployments** tab.
+
+> 💾 **Keep the Notepad file** (save it somewhere private, e.g. as `haanta-railway.txt` in Documents, **not** in the Haanta folder).
+> You'll edit it again in Step 7.
 
 ### 3e. Wait for it to go green
 
