@@ -2,7 +2,7 @@
 
 > **Status: IN PROGRESS.** This file is the live checkpoint. It becomes the final report (how to run,
 > test results, decisions, gaps, security review, go-live needs) when the build completes.
-> Last updated: 2026-10-18.
+> Last updated: 2026-10-21.
 
 ## Stage status
 
@@ -11,7 +11,7 @@
 | 1. Foundations | Partly done | Monorepo, shared config, tokens, local Postgres, Medusa + both Next apps running, auth/roles/MFA on the API. **Missing:** CI workflows, docker-compose file, README, admin MFA screen. |
 | 2. Shipping + pricing engines | Done | 70 shipping tests, 16 pricing tests; wired into Medusa (fulfilment provider + server-side pricing). |
 | 3. Catalog migration | Done (code) | Transform tested on the real export: 1,280/1,370 products mapped, 90 without any brand reported; per-vendor markups derived from Wix price/cost; dry run writes review CSV + redirect map; idempotent import. |
-| 4. Storefront | Redesign done; polishing | Onuli/ASOS-style redesign on the real catalog (1,052 live products). Size guide and optional custom sizing on every product; sold-out options disabled. 18/18 Playwright e2e (desktop + mobile, axe checks included). Lighthouse (local, mobile): accessibility, best practices and SEO 100 on home, listing and product; performance 80–85 when the machine is quiet (see below). |
+| 4. Storefront | Luxe redesign done (2026-10-21, see below); owner review | Onuli/ASOS-style redesign on the real catalog (1,052 live products). Size guide and optional custom sizing on every product; sold-out options disabled. 18/18 Playwright e2e (desktop + mobile, axe checks included). Lighthouse (local, mobile): accessibility, best practices and SEO 100 on home, listing and product; performance 80–85 when the machine is quiet (see below). |
 | 5. Vendor portal + review queue | Portal done; admin queue UI pending | Vendor portal built (22 routes, 29 unit tests, axe scans clean); review-queue API done and tested. |
 | 6. Ledger, payouts, admin dashboard | API done, UI not started | Ledger/payout/reconciliation/dashboard APIs done; Medusa admin extensions not built. |
 | 7. Launch readiness | Not started | |
@@ -44,6 +44,15 @@
 | PII guard blocked vendor order views: the hub address's `address_1`/`phone` keys matched the buyer-PII key list (false positive; no buyer data present) | Key checks skip `ship_to` (Haanta's hub, from settings); buyer values are still checked everywhere |
 | Mock payment route silently treated unknown test cards (e.g. `pm_card_chargeDeclined`) as Visa, so the declined path was never exercised (local mock only; the route is 404 in production and with real keys) | Unknown methods now return 400 and the mock throws; the e2e test asserts a real decline |
 | Search index rebuild blocked the event loop for ~19 s (all requests stalled, e.g. 18.9 s cart creation) | Paged queries, flat stock lookup and maps: ~10 s cold build in the background, ~1 s longest stall; event-driven refresh |
+
+## Luxe minimalist redesign (2026-10-21)
+
+Owner brief: minimalist, beautiful, luxury; storefront first, then the vendor portal.
+
+- **System:** ivory page (`palette.ivory`) with stone image wells (`palette.stone`), ink type, hairline rules, square corners, small-caps labels; Cinzel for display headings; primary buttons ink (brown on hover); brown kept for the wordmark, footer and charts. New text/background pairs are covered by the AA contrast tests.
+- **Storefront:** single-row header with a full-width search panel and editorial mega menu; home rebuilt (full-bleed hero, brand statement, department triptych, rails, story, photo edits, occasion banner, designer in focus, journal, promises); product page with stacked gallery, sticky details and sizes in size order (`lib/option-order.ts`, tested); designer pages as studio introductions with a cover photo; photo heroes for edits; A–Z directory; journal covers; two-column bag; checkout steps as hairline sections.
+- **Bugs fixed on the way:** product names uppercased in listings (inherited from `.s-listing__results`); cart summary rows and promo label stacked; cart grid never applied; filter sidebar header shown on desktop; red focus ring on checkout step headings at load; edits sharing the same cover photo; newsletter forms rendering as a brown band.
+- **Vendor portal:** same visual language as a working tool (ivory shell, white hairline panels, small-caps navigation and tables, ink buttons).
 
 ## Storefront fixes found by the e2e and Lighthouse runs (2026-10-18)
 

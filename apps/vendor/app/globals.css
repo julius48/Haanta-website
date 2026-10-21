@@ -693,3 +693,374 @@ a.v-item__title {
 .v-print-only {
   display: none;
 }
+
+/* ================================================================ Haanta luxe theme
+ * Same visual language as the storefront, tuned for a working tool: ivory page, white panels with
+ * hairlines, ink type, small-caps labels, ink buttons. No radii. Brown stays for the wordmark and charts.
+ */
+:root {
+  --v-page: var(--haanta-ivory);
+  --v-panel: var(--haanta-white);
+  --v-ink: var(--haanta-ink);
+  --v-rule: color-mix(in srgb, var(--haanta-ink) 11%, transparent);
+  --v-rule-strong: color-mix(in srgb, var(--haanta-ink) 24%, transparent);
+  --color-border: var(--v-rule);
+}
+
+body {
+  background: var(--v-page);
+  color: var(--v-ink);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--v-ink);
+}
+
+h1 {
+  font-size: clamp(26px, 2.6vw, 34px);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--v-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Small-caps label style shared by card titles, tabs, nav, table heads, legends. */
+.v-card h2,
+.v-nav-link,
+.v-tab,
+.v-table thead th,
+.v-stat__label,
+.v-brand__label,
+.v-table caption {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Shell: an ivory top bar with a hairline; brown wordmark. */
+.v-topbar,
+.v-auth__head {
+  background: color-mix(in srgb, var(--v-page) 94%, transparent);
+  backdrop-filter: blur(14px);
+  color: var(--v-ink);
+  border-bottom: 1px solid var(--v-rule);
+}
+
+.v-brand,
+.v-brand:hover {
+  color: var(--color-brand);
+  align-items: center;
+  gap: 14px;
+}
+
+.v-brand .h-wordmark {
+  font-size: 24px;
+}
+
+.v-brand__label {
+  color: var(--color-text-muted);
+  padding-left: 14px;
+  border-left: 1px solid var(--v-rule-strong);
+}
+
+.v-topbar :focus-visible {
+  outline-color: var(--color-focus);
+}
+
+.v-menu-toggle {
+  border-color: var(--v-rule-strong);
+  border-radius: 0;
+  color: var(--v-ink);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.v-sidenav {
+  background: transparent;
+}
+
+.v-nav-list {
+  padding-top: 20px;
+}
+
+.v-nav-link {
+  min-height: 42px;
+  padding: 8px 24px;
+  color: var(--color-text-muted);
+  border-left: 1px solid transparent;
+}
+
+.v-nav-link:hover {
+  background: transparent;
+  color: var(--v-ink);
+}
+
+.v-nav-link[aria-current="page"] {
+  color: var(--v-ink);
+  font-weight: 500;
+  background: transparent;
+  border-left-color: var(--v-ink);
+}
+
+.v-main {
+  padding-top: 40px;
+}
+
+@media (min-width: 1024px) {
+  .v-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .v-main {
+    padding-left: 24px;
+  }
+}
+
+/* Panels */
+.v-card,
+.v-stat,
+.v-table-wrap,
+.v-preview,
+.v-thumb {
+  background: var(--v-panel);
+  border: 1px solid var(--v-rule);
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .v-card {
+    padding: 28px;
+  }
+}
+
+.v-card h2 {
+  margin-bottom: 20px;
+}
+
+.v-stat {
+  padding: 20px;
+}
+
+.v-stat__label {
+  letter-spacing: 0.16em;
+}
+
+.v-stat__value {
+  margin-top: 6px;
+  color: var(--v-ink);
+  font-size: clamp(26px, 2.4vw, 34px);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+.v-page-head {
+  margin-bottom: 32px;
+}
+
+/* Buttons: ink, small caps, square. */
+.h-btn {
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.h-btn--primary {
+  background: var(--v-ink);
+  border-color: var(--v-ink);
+  color: var(--v-page);
+}
+
+.h-btn--primary:hover:not(:disabled) {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+.h-btn--secondary {
+  background: transparent;
+  border-color: var(--v-rule-strong);
+  color: var(--v-ink);
+}
+
+.h-btn--secondary:hover:not(:disabled) {
+  border-color: var(--v-ink);
+}
+
+.v-link-btn {
+  color: var(--v-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Forms */
+.v-label,
+.v-fieldset legend {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.v-input,
+.v-select,
+.v-textarea {
+  min-height: 46px;
+  border: 1px solid var(--v-rule-strong);
+  border-radius: 0;
+  background: var(--v-panel);
+  padding-inline: 14px;
+}
+
+.v-input:focus,
+.v-select:focus,
+.v-textarea:focus {
+  outline: none;
+  border-color: var(--v-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--haanta-tan) 40%, transparent);
+}
+
+.v-check input {
+  accent-color: var(--v-ink);
+}
+
+/* Alerts and banners */
+.v-alert {
+  border-radius: 0;
+  border-left-width: 2px;
+  background: var(--v-panel);
+}
+
+.v-banner {
+  background: var(--haanta-stone);
+  border-bottom-color: var(--v-rule);
+  font-size: 14px;
+}
+
+.v-banner strong {
+  color: var(--v-ink);
+  font-weight: 500;
+}
+
+/* Chips and tabs */
+.v-chip {
+  padding: 3px 8px;
+  border-radius: 0;
+  background: transparent;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.v-tabs {
+  gap: 24px;
+  margin-bottom: 8px;
+  border-bottom-color: var(--v-rule);
+}
+
+.v-tab {
+  padding: 8px 0;
+  color: var(--color-text-muted);
+  border-bottom-width: 1px;
+}
+
+.v-tab[aria-current="page"] {
+  color: var(--v-ink);
+  font-weight: 500;
+  border-bottom-color: var(--v-ink);
+}
+
+/* Lists and tables */
+.v-list > li {
+  padding: 16px 0;
+}
+
+.v-item__title,
+a.v-item__title {
+  color: var(--v-ink);
+  font-weight: 400;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+a.v-item__title:hover {
+  color: var(--color-brand);
+}
+
+.v-table {
+  font-size: 14px;
+}
+
+.v-table caption {
+  color: var(--v-ink);
+}
+
+.v-table th,
+.v-table td {
+  padding: 12px 16px;
+  border-bottom-color: var(--v-rule);
+}
+
+.v-table thead th {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.v-table tbody th {
+  font-weight: 400;
+}
+
+/* Chart: brand brown bars with a softer hover. */
+.v-chart__bar {
+  fill: color-mix(in srgb, var(--color-brand) 88%, transparent);
+}
+
+.v-chart__label {
+  font-size: 11px;
+}
+
+.v-codes,
+.v-secret {
+  border-radius: 0;
+  background: var(--haanta-stone);
+}
+
+.v-auth__body {
+  padding-top: 64px;
+}
+
+.v-auth__body h1 {
+  font-family: var(--font-display-stack);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Lists that are also panels: pad the rows, not the panel (rows keep full-width hairlines). */
+.v-list.v-card {
+  padding: 0;
+}
+
+.v-list.v-card > li {
+  padding-inline: 20px;
+}
+
+@media (min-width: 768px) {
+  .v-list.v-card > li {
+    padding-inline: 28px;
+  }
+}

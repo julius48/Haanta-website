@@ -11,8 +11,12 @@ export default async function RegisterPage() {
   await connection()
   if (await getCustomer()) redirect("/account")
   return (
-    <main id="main" className="h-container s-page s-narrow">
-      <h1>Create an account</h1>
+    <main id="main" className="h-container s-page s-narrow s-auth">
+      <header className="s-head">
+        <p className="s-section__eyebrow">Your Haanta</p>
+        <h1 className="s-head__title h-display">Create an account</h1>
+        <p className="s-head__lead">Save pieces you love, check out faster and follow every order.</p>
+      </header>
       <RegisterForm />
       <p>
         Already have an account? <Link href="/account/login">Sign in</Link>

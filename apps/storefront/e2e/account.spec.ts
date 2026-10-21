@@ -15,6 +15,8 @@ test("register, sign out and sign in again", async ({ page }) => {
   await page.getByTestId("register-password").fill("short")
   await page.getByTestId("register-submit").click()
   await expect(page.getByTestId("register-form")).toContainText(/12 characters/)
+  // React clears the password after the failed action; wait for that before typing, or the reset can wipe the new value.
+  await expect(page.getByTestId("register-password")).toHaveValue("")
 
   await page.getByTestId("register-password").fill(password)
   await page.getByTestId("register-submit").click()

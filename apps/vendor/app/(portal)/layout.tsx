@@ -30,7 +30,7 @@ export default async function PortalLayout({ children }: { children: React.React
     <PortalFrame
       brand={
         <Link href="/dashboard" className="v-brand">
-          <Wordmark tone="tan" />
+          <Wordmark tone="brown" />
           <span className="v-brand__label">Partner Portal</span>
           <span className="h-sr-only">, {me.vendor.name}</span>
         </Link>

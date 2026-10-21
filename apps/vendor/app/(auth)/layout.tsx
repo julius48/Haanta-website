@@ -9,7 +9,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       <header className="v-auth__head">
         <div className="h-container">
           <Link href="/login" className="v-brand">
-            <Wordmark tone="tan" />
+            <Wordmark tone="brown" />
             <span className="v-brand__label">Partner Portal</span>
           </Link>
         </div>

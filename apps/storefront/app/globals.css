@@ -14,8 +14,8 @@
   --s-brown-deep: color-mix(in srgb, var(--color-brand) 82%, black);
   --s-shadow-1: 0 1px 2px color-mix(in srgb, var(--color-brand) 10%, transparent), 0 8px 24px color-mix(in srgb, var(--color-brand) 8%, transparent);
   --s-shadow-2: 0 24px 64px color-mix(in srgb, var(--color-brand) 22%, transparent);
-  --s-radius: 2px;
-  --s-radius-lg: 6px;
+  --s-radius: 0;
+  --s-radius-lg: 0;
   --s-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --s-header-h: 76px;
   --s-gutter: var(--layout-margin-mobile);
@@ -265,15 +265,17 @@ img {
   text-align: center;
 }
 
+/* Primary actions are ink; they warm to brand brown on hover. */
 .h-btn--primary {
-  background: var(--color-brand);
-  color: var(--color-text-inverse);
-  border-color: var(--color-brand);
+  background: var(--s-ink);
+  color: var(--s-page);
+  border-color: var(--s-ink);
 }
 
 .h-btn--primary:hover:not(:disabled) {
-  background: var(--s-brown-deep);
-  color: var(--color-text-inverse);
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: var(--s-page);
 }
 
 .h-btn--secondary {
@@ -3042,7 +3044,39 @@ textarea.s-input {
 
 .s-cart,
 .s-checkout {
-  padding-block: clamp(32px, 5vw, 64px) var(--s-section-y);
+  padding-block: clamp(24px, 4vw, 48px) 0;
+}
+
+/* Bag and checkout: lines (or steps) left, a sticky summary right. */
+@media (min-width: 1024px) {
+  .s-cart,
+  .s-checkout__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: clamp(40px, 6vw, 112px);
+    align-items: start;
+  }
+  .s-cart__aside,
+  .s-checkout__aside {
+    position: sticky;
+    top: 100px;
+  }
+}
+
+.s-cart__aside,
+.s-checkout__aside {
+  display: grid;
+  gap: 20px;
+  align-self: start;
+}
+
+.s-cart__aside h2,
+.s-checkout__aside h2 {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 .s-cart__lines,
@@ -3050,17 +3084,22 @@ textarea.s-input {
   display: grid;
 }
 
+.s-lines {
+  border-top: 1px solid var(--s-rule);
+}
+
 .s-line {
   display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: var(--space-4);
-  padding-block: var(--space-6);
-  border-bottom: 1px solid var(--s-hairline);
+  grid-template-columns: 92px 1fr;
+  gap: 20px;
+  padding-block: 24px;
+  border-bottom: 1px solid var(--s-rule);
 }
 
 @media (min-width: 640px) {
   .s-line {
     grid-template-columns: 120px 1fr auto;
+    gap: 28px;
   }
 }
 
@@ -3068,7 +3107,7 @@ textarea.s-input {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: var(--s-tan-wash);
+  background: var(--s-well);
 }
 
 .s-line__info {
@@ -3077,64 +3116,59 @@ textarea.s-input {
   align-content: start;
 }
 
-.s-line__title {
-  font-size: 16px;
-  font-weight: 600;
+.s-line__info p {
   margin: 0;
+}
+
+.s-line__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.s-line .s-line__title a {
+  text-decoration: none;
 }
 
 .s-line__controls {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
+  gap: 16px;
+  margin-top: 12px;
 }
 
 .s-line__qty {
-  width: 84px;
+  width: 76px;
+}
+
+.s-line__controls .s-input {
+  min-height: 42px;
+  background: transparent;
 }
 
 .s-line__total {
-  font-weight: 600;
-  color: var(--color-brand);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--s-ink);
   text-align: right;
 }
 
-.s-cart__aside,
-.s-checkout__aside {
-  align-self: start;
-}
-
-@media (min-width: 1024px) {
-  .s-cart .s-checkout__layout,
-  .s-checkout__layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 420px;
-    gap: clamp(32px, 4vw, 64px);
-    align-items: start;
-  }
-  .s-cart__aside,
-  .s-checkout__aside {
-    position: sticky;
-    top: calc(var(--s-header-h) + 24px);
-  }
-}
-
+/* Summary: label and amount on one line; the total set apart by a hairline. */
 .s-summary {
-  padding: var(--space-6);
-  background: var(--s-tan-wash);
-  border-radius: var(--s-radius-lg);
   display: grid;
-  gap: var(--space-3);
+  gap: 10px;
+  margin: 0;
+  padding: 24px;
+  background: var(--s-well);
 }
 
-.s-summary dl,
-.s-summary__row {
+.s-summary > div {
   display: flex;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin: 0;
-  font-size: 15px;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: 300;
 }
 
 .s-summary dt,
@@ -3142,92 +3176,122 @@ textarea.s-input {
   margin: 0;
 }
 
-.s-summary__total {
-  display: flex;
-  justify-content: space-between;
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--s-hairline-strong);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-brand);
+.s-summary > .s-summary__total {
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--s-rule-strong);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--s-ink);
 }
 
 .s-summary__duties {
-  font-size: 13px;
-  color: var(--color-success);
   display: flex;
   gap: var(--space-2);
   align-items: center;
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 300;
+  color: var(--color-success);
 }
 
 .s-progress {
   display: grid;
-  gap: var(--space-2);
+  gap: 10px;
   font-size: 13px;
+  font-weight: 300;
+}
+
+.s-progress p {
+  margin: 0;
 }
 
 .s-progress progress {
   width: 100%;
-  height: 4px;
+  height: 2px;
   appearance: none;
   border: 0;
-  border-radius: 2px;
-  background: var(--s-hairline);
+  background: var(--s-rule);
   overflow: hidden;
 }
 
 .s-progress progress::-webkit-progress-bar {
-  background: var(--s-hairline);
+  background: var(--s-rule);
 }
 
 .s-progress progress::-webkit-progress-value {
-  background: var(--color-brand);
+  background: var(--s-ink);
 }
 
 .s-progress progress::-moz-progress-bar {
-  background: var(--color-brand);
+  background: var(--s-ink);
 }
 
 .s-promo {
-  border-top: 1px solid var(--s-hairline);
-  padding-top: var(--space-4);
+  padding-top: 4px;
 }
 
 .s-promo__form {
-  display: flex;
-  gap: var(--space-2);
+  display: block;
 }
 
+.s-promo .s-newsletter__row .s-input {
+  min-height: 46px;
+  background: transparent;
+}
+
+.s-promo .s-newsletter__row .h-btn {
+  min-height: 46px;
+  padding-inline: 20px;
+}
+
+.s-cart__aside .s-btn-block {
+  min-height: 54px;
+  background: var(--s-ink);
+  border-color: var(--s-ink);
+}
+
+.s-cart__aside .s-btn-block:hover {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+/* Checkout steps: hairline-separated sections, not boxes. */
 .s-checkout__steps {
   display: grid;
-  gap: var(--space-4);
+  border-top: 1px solid var(--s-rule);
 }
 
 .s-step {
-  border: 1px solid var(--s-hairline);
-  border-radius: var(--s-radius-lg);
-  padding: clamp(20px, 3vw, 32px);
-  background: var(--color-background);
+  padding-block: clamp(24px, 3vw, 36px);
+  border-bottom: 1px solid var(--s-rule);
 }
 
 .s-step h2 {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  margin-bottom: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Step headings take programmatic focus (announced to screen readers); no ring for that. */
+.s-step h2[tabindex="-1"]:focus {
+  outline: none;
 }
 
 .s-step__summary {
   color: var(--color-text-muted);
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 300;
 }
 
 .s-ship-options {
   display: grid;
-  gap: var(--space-3);
+  gap: 10px;
   border: 0;
   padding: 0;
   margin: 0;
@@ -3236,48 +3300,47 @@ textarea.s-input {
 .s-ship-option {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: var(--space-4);
+  gap: 16px;
   align-items: start;
-  padding: var(--space-4);
-  border: 1px solid var(--s-hairline-strong);
-  border-radius: var(--s-radius-lg);
+  padding: 18px;
+  border: 1px solid var(--s-rule-strong);
   cursor: pointer;
   transition: border-color 0.2s var(--s-ease), background 0.2s var(--s-ease);
 }
 
 .s-ship-option:has(input:checked) {
-  border-color: var(--color-brand);
-  background: var(--s-tan-wash);
+  border-color: var(--s-ink);
+  background: var(--s-well);
 }
 
 .s-ship-option input {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--color-brand);
+  width: 18px;
+  height: 18px;
+  accent-color: var(--s-ink);
   margin-top: 2px;
 }
 
 .s-ship-option__title {
-  font-weight: 600;
   margin: 0;
+  font-weight: 500;
 }
 
 .s-ship-option__text {
-  font-size: 14px;
-  color: var(--color-text-muted);
   margin: 0;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--color-text-muted);
 }
 
 .s-ship-option__price {
-  font-weight: 700;
-  color: var(--color-brand);
+  font-weight: 400;
+  color: var(--s-ink);
 }
 
 .s-test-pay {
-  border: 1px dashed var(--s-hairline-strong);
+  border: 1px dashed var(--s-rule-strong);
   padding: var(--space-6);
-  border-radius: var(--s-radius-lg);
-  background: var(--s-tan-wash);
+  background: var(--s-well);
 }
 
 .s-paypal {
@@ -3296,17 +3359,17 @@ textarea.s-input {
 
 .s-account-nav a {
   padding: var(--space-3) var(--space-4);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
 
 .s-account-nav a[aria-current="page"] {
-  border-bottom-color: var(--color-brand);
-  color: var(--color-brand);
+  border-bottom-color: var(--s-ink);
+  color: var(--s-ink);
 }
 
 .s-auth-grid {
@@ -3321,9 +3384,7 @@ textarea.s-input {
 }
 
 .s-auth-form {
-  padding: clamp(24px, 4vw, 40px);
-  border: 1px solid var(--s-hairline);
-  border-radius: var(--s-radius-lg);
+  padding: 0;
 }
 
 .s-address-list {
@@ -3339,8 +3400,7 @@ textarea.s-input {
 
 .s-address {
   padding: var(--space-6);
-  border: 1px solid var(--s-hairline);
-  border-radius: var(--s-radius-lg);
+  border: 1px solid var(--s-rule);
   font-style: normal;
 }
 
@@ -3369,8 +3429,7 @@ textarea.s-input {
 
 .s-shipment {
   padding: var(--space-6);
-  border: 1px solid var(--s-hairline);
-  border-radius: var(--s-radius-lg);
+  border: 1px solid var(--s-rule);
   margin-bottom: var(--space-4);
 }
 
@@ -3381,16 +3440,18 @@ textarea.s-input {
 }
 
 .s-article {
-  max-width: 720px;
+  max-width: 700px;
   margin-inline: auto;
-  font-size: 18px;
-  line-height: 1.75;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.85;
 }
 
 .s-article h1 {
   font-family: var(--font-display-stack);
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
   font-size: clamp(32px, 4.4vw, 56px);
   line-height: 1.08;
 }
@@ -4046,4 +4107,23 @@ textarea.s-input {
 
 .s-shop-hero__tagline {
   font-size: clamp(28px, 4vw, 54px);
+}
+
+/* Sign in / register: a narrow, centred column; the switch link sits quietly under the form. */
+.s-auth {
+  max-width: 480px;
+}
+
+.s-auth > p:last-child {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.s-auth .h-btn--primary {
+  width: 100%;
+  min-height: 54px;
+  background: var(--s-ink);
+  border-color: var(--s-ink);
 }
