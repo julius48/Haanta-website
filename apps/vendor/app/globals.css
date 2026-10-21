@@ -1544,3 +1544,383 @@ a.v-item__title:hover {
     font-size: 11.5px;
   }
 }
+
+/* ---------------------------------------------------------------- store page */
+
+/* Completeness: a thin meter and a checklist of what buyers notice first. */
+.v-progress-card {
+  margin-bottom: 24px;
+  padding: 24px 28px;
+  background: var(--v-panel);
+  border: 1px solid var(--v-rule);
+  box-shadow: var(--v-shadow);
+}
+
+.v-progress-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.v-progress-card h2 {
+  margin: 0;
+  font-family: var(--font-display-stack);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.v-progress-card__head p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.v-meter {
+  height: 2px;
+  margin: 16px 0 18px;
+  background: var(--v-rule);
+}
+
+.v-meter span {
+  display: block;
+  height: 100%;
+  background: var(--haanta-tan);
+  transition: width 0.6s var(--v-ease);
+}
+
+.v-checklist {
+  display: grid;
+  gap: 10px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 700px) {
+  .v-checklist {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.v-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.v-checklist__mark {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--v-rule-strong);
+  border-radius: 50%;
+}
+
+.v-checklist .is-done {
+  color: var(--v-ink);
+}
+
+.v-checklist__mark {
+  position: relative;
+}
+
+.v-checklist .is-done .v-checklist__mark {
+  border-color: var(--haanta-tan);
+  background: var(--haanta-tan);
+}
+
+.v-checklist .is-done .v-checklist__mark::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--v-ink);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+/* Editor left, sticky preview right. */
+.v-store {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 1180px) {
+  .v-store {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+  .v-store__preview {
+    position: sticky;
+    top: 32px;
+  }
+}
+
+.v-store-form {
+  background: var(--v-panel);
+  border: 1px solid var(--v-rule);
+  box-shadow: var(--v-shadow);
+}
+
+.v-store-form > .v-alert,
+.v-store-form > [role="alert"] {
+  margin: 24px 28px 0;
+}
+
+.v-store-form .v-fieldset {
+  margin: 0;
+}
+
+.v-form-section {
+  padding: 28px;
+  border-bottom: 1px solid var(--v-rule);
+}
+
+.v-form-section__head {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.v-form-section__n {
+  flex: none;
+  font-family: var(--font-display-stack);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--haanta-tan);
+  padding-top: 2px;
+}
+
+.v-form-section__head h3 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.v-form-section__head p {
+  margin: 0;
+  max-width: 56ch;
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--color-text-muted);
+}
+
+.v-form-section .v-field:last-child {
+  margin-bottom: 0;
+}
+
+.v-store-form__save {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 28px;
+  background: color-mix(in srgb, var(--v-panel) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.v-store-form__save p {
+  margin: 0;
+}
+
+/* Upload tile: dashed drop zone; the hidden input keeps keyboard focus, shown on the tile. */
+.v-drop {
+  position: relative;
+}
+
+.v-drop__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.v-drop__tile {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 132px;
+  padding: 20px;
+  border: 1px dashed var(--v-rule-strong);
+  background: color-mix(in srgb, var(--haanta-stone) 35%, var(--v-panel));
+  color: var(--color-text-muted);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.v-drop__tile svg {
+  color: var(--haanta-tan);
+}
+
+.v-drop__title {
+  color: var(--v-ink);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.v-drop__sub {
+  font-size: 12.5px;
+  font-weight: 300;
+}
+
+.v-drop__tile:hover,
+.v-drop.is-dragging .v-drop__tile {
+  border-color: var(--v-ink);
+  background: color-mix(in srgb, var(--haanta-stone) 60%, var(--v-panel));
+}
+
+.v-drop__input:focus-visible + .v-drop__tile {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.v-drop.is-disabled .v-drop__tile {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.v-thumb {
+  box-shadow: none;
+}
+
+.v-thumb__actions .h-btn {
+  min-height: 36px;
+  letter-spacing: 0.12em;
+}
+
+/* Preview: the storefront's studio introduction, in miniature. */
+.v-store__preview {
+  padding: 24px;
+  background: var(--v-panel);
+  border: 1px solid var(--v-rule);
+  box-shadow: var(--v-shadow);
+}
+
+.v-shop-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--haanta-stone);
+}
+
+.v-shop-preview__cover {
+  position: relative;
+  order: 2;
+  min-height: 280px;
+  background: color-mix(in srgb, var(--haanta-ink) 8%, var(--haanta-stone));
+}
+
+.v-shop-preview__cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.v-shop-preview__empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.v-shop-preview__copy {
+  align-self: center;
+  padding: 24px 18px;
+}
+
+.v-shop-preview__logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--v-page);
+}
+
+.v-shop-preview__eyebrow {
+  margin: 0 0 8px;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.v-shop-preview__name {
+  margin: 0 0 12px;
+  font-family: var(--font-display-stack);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.v-shop-preview__lead {
+  margin: 0 0 14px;
+  font-size: 11.5px;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.v-shop-preview__link {
+  display: inline-block;
+  padding-bottom: 3px;
+  border-bottom: 1px solid currentColor;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.v-shop-preview__more {
+  margin-top: 20px;
+  font-size: 13.5px;
+  font-weight: 300;
+  line-height: 1.75;
+}
+
+.v-shop-preview__more h4 {
+  margin: 18px 0 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.v-store__preview h2 {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Upload tiles side by side line up at the bottom whatever the hint length. */
+.v-form-section .v-grid--2 {
+  align-items: end;
+}

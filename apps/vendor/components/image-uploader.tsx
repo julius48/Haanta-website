@@ -54,6 +54,7 @@ export function ImageUploader({
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState("")
   const [problems, setProblems] = useState<string[]>([])
+  const [dragging, setDragging] = useState(false)
   const statusId = useId()
   const remaining = max - value.length
 
@@ -132,21 +133,46 @@ export function ImageUploader({
         <input type="hidden" name={name} value="" />
       ) : null}
       {remaining > 0 || max === 1 ? (
-        <input
-          id={id}
-          type="file"
-          className="v-file-input"
-          accept={ACCEPTED_IMAGE_TYPES.join(",")}
-          multiple={max > 1}
-          disabled={disabled || busy}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          data-testid={`${id}-input`}
-          onChange={(e) => {
-            void onFiles(e.currentTarget.files)
-            e.currentTarget.value = ""
+        // Drop zone: the real file input stays in the tab order (visually hidden); the tile is its visual label.
+        <div
+          className={`v-drop ${dragging ? "is-dragging" : ""} ${disabled || busy ? "is-disabled" : ""}`}
+          onDragOver={(e) => {
+            if (disabled || busy) return
+            e.preventDefault()
+            setDragging(true)
           }}
-        />
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragging(false)
+            if (!disabled && !busy) void onFiles(e.dataTransfer.files)
+          }}
+        >
+          <input
+            id={id}
+            type="file"
+            className="v-drop__input"
+            accept={ACCEPTED_IMAGE_TYPES.join(",")}
+            multiple={max > 1}
+            disabled={disabled || busy}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
+            data-testid={`${id}-input`}
+            onChange={(e) => {
+              void onFiles(e.currentTarget.files)
+              e.currentTarget.value = ""
+            }}
+          />
+          <label htmlFor={id} className="v-drop__tile" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="16" />
+              <circle cx="9" cy="10" r="2" />
+              <path d="M21 16l-5-5-8 9" />
+            </svg>
+            <span className="v-drop__title">{busy ? status || "Uploading…" : value.length && max === 1 ? "Replace photo" : max > 1 ? "Add photos" : "Choose a photo"}</span>
+            <span className="v-drop__sub">or drag {max > 1 ? "them" : "it"} here</span>
+          </label>
+        </div>
       ) : (
         <p className="v-hint" id={id}>
           You&apos;ve added the maximum of {max} photos.
