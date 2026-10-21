@@ -8,6 +8,9 @@ import { breadcrumbJsonLd } from "@/lib/jsonld"
 import { getShop } from "@/lib/content"
 import { hasActiveFilters, parseFilters, type RawParams } from "@/lib/filters"
 import { listingCanonical, loadListing } from "@/lib/server/listing"
+import { shopCoverImages } from "@/lib/server/catalog"
+import { getRegion } from "@/lib/server/region"
+import { ProductImage } from "@/components/ui/ProductImage"
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<RawParams> }
 
@@ -30,10 +33,11 @@ export default async function CuratedShopPage({ params, searchParams }: Props) {
   const { slug } = await params
   const shop = /^[a-z0-9-]{1,60}$/.test(slug) ? await getShop(slug) : null
   if (!shop) notFound()
-  const data = await loadListing(await searchParams, { shop: shop.slug })
+  const [data, { currency }] = await Promise.all([loadListing(await searchParams, { shop: shop.slug }), getRegion()])
+  const cover = (await shopCoverImages([shop.slug], currency))[shop.slug]
   const items = [
     { name: "Home", path: "/" },
-    { name: "Curated shops", path: "/shops" },
+    { name: "Edits", path: "/shops" },
     { name: shop.title, path: `/shops/${shop.slug}` },
   ]
   return (
@@ -43,9 +47,12 @@ export default async function CuratedShopPage({ params, searchParams }: Props) {
         title={shop.title}
         hero={
           <section className="s-shop-hero" aria-labelledby="shop-hero-tag">
-            <div className="h-container">
+            <div className="s-shop-hero__media">
+              <ProductImage src={cover} alt="" sizes="100vw" priority />
+            </div>
+            <div className="h-container s-shop-hero__copy">
               <p id="shop-hero-tag" className="s-shop-hero__eyebrow">
-                Curated shop
+                The Edit
               </p>
               <p className="s-shop-hero__tagline h-display">{shop.tagline}</p>
             </div>

@@ -1,7 +1,7 @@
 import "server-only"
 import { cache } from "react"
 import { ApiError, medusa } from "./medusa"
-import { toSearchQuery, type ListingFilters } from "@/lib/filters"
+import { parseFilters, toSearchQuery, type ListingFilters } from "@/lib/filters"
 import type { StoreVariant, BrandDetail, BrandSummary, ProductExtras, SearchResult, Settings, StoreProduct } from "@/lib/types"
 
 const EMPTY_RESULT: SearchResult = { hits: [], total: 0, page: 1, pages: 1, facets: {}, price_range: { min: 0, max: 0 } }
@@ -119,4 +119,19 @@ export function slimForClient(p: StoreProduct): { options: NonNullable<StoreProd
       in_stock: variantInStock(v),
     })),
   }
+}
+
+/** One representative image per curated edit (a best seller), keyed by slug; no two edits share a photo. */
+export async function shopCoverImages(slugs: string[], currency: string): Promise<Record<string, string | null>> {
+  const base = parseFilters({})
+  const results = await Promise.all(slugs.map((shop) => searchProducts({ ...base, sort: "best_selling" }, { currency, shop, limit: 6 })))
+  const used = new Set<string>()
+  const out: Record<string, string | null> = {}
+  slugs.forEach((slug, i) => {
+    const images = (results[i]?.hits ?? []).map((d) => d.images?.[0] ?? d.thumbnail).filter((u): u is string => !!u)
+    const pick = images.find((u) => !used.has(u)) ?? images[0] ?? null
+    if (pick) used.add(pick)
+    out[slug] = pick
+  })
+  return out
 }

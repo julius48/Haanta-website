@@ -131,7 +131,7 @@ export default async function ProductPage({ params }: Props) {
           <Gallery images={images} title={product.title} />
           <div className="s-pdp__info">
             <p className="s-brand-line">
-              <Link href={`/brands/${extras.vendor.slug}`} data-testid="pdp-brand">
+              <Link href={`/brands/${extras.vendor.slug}`} className="s-brand-line__link" data-testid="pdp-brand">
                 {extras.vendor.name}
               </Link>
               {extras.vendor.region ? <span className="s-muted"> · {extras.vendor.region}</span> : null}

@@ -2,20 +2,15 @@ import Link from "next/link"
 import { Wordmark } from "@haanta/ui"
 import { NavMenu } from "./NavMenu"
 import { CountrySwitcher } from "./CountrySwitcher"
+import { SearchToggle } from "./SearchToggle"
 import { CATEGORIES } from "@/lib/categories"
 import { listShops, getBanners } from "@/lib/content"
 import { getCartCount } from "@/lib/server/cart"
 import { getRegion } from "@/lib/server/region"
 import { isSignedIn, getWishlistIds } from "@/lib/server/customer"
 
-function Icon({ name }: { name: "search" | "user" | "heart" | "bag" }) {
+function Icon({ name }: { name: "user" | "heart" | "bag" }) {
   const paths: Record<typeof name, React.ReactNode> = {
-    search: (
-      <>
-        <circle cx="10.5" cy="10.5" r="6.5" />
-        <path d="M15.5 15.5L20.5 20.5" />
-      </>
-    ),
     user: (
       <>
         <circle cx="12" cy="8" r="4" />
@@ -60,6 +55,7 @@ export async function Header() {
     getWishlistIds(),
   ])
   const announcement = banners.find((b) => b.placement === "announcement")
+  const navShops = shops.map((s) => ({ slug: s.slug, title: s.title }))
   return (
     <header className="s-header">
       {announcement ? (
@@ -73,30 +69,23 @@ export async function Header() {
           </div>
         </div>
       ) : null}
+      {/* One row: menu (small screens) · wordmark · departments · search and icons. */}
       <div className="h-container s-header__main">
         <div className="s-header__left">
-          <NavMenu categories={CATEGORIES} shops={shops.map((s) => ({ slug: s.slug, title: s.title }))} country={country} part="drawer" />
-          <form action="/search" method="get" role="search" className="s-search">
-            <label htmlFor="site-search" className="h-sr-only">
-              Search products and designers
-            </label>
-            <input id="site-search" name="q" type="search" placeholder="Search for pieces and designers" className="s-search__input" maxLength={100} data-testid="search-input" />
-            <button type="submit" className="s-icon-btn" aria-label="Search">
-              <Icon name="search" />
-            </button>
-          </form>
-        </div>
-        <Link href="/" className="s-logo">
-          {/* The stylised wordmark is decorative; the link's name comes from the text below (WCAG 2.5.3). */}
-          <span aria-hidden="true">
-            <Wordmark />
-          </span>
-          <span className="h-sr-only">Haanta home</span>
-        </Link>
-        <div className="s-header__actions">
-          <Link href="/search" className="s-icon-btn s-search-toggle" aria-label="Search">
-            <Icon name="search" />
+          <NavMenu categories={CATEGORIES} shops={navShops} country={country} part="drawer" />
+          <Link href="/" className="s-logo">
+            {/* The stylised wordmark is decorative; the link's name comes from the text below (WCAG 2.5.3). */}
+            <span aria-hidden="true">
+              <Wordmark />
+            </span>
+            <span className="h-sr-only">Haanta home</span>
           </Link>
+        </div>
+        <div className="s-header__nav">
+          <NavMenu categories={CATEGORIES} shops={navShops} country={country} part="bar" />
+        </div>
+        <div className="s-header__actions">
+          <SearchToggle />
           <CountrySwitcher country={country} />
           <ul className="s-header__icons">
             <li className="s-header__icon--account">
@@ -120,11 +109,6 @@ export async function Header() {
               </Link>
             </li>
           </ul>
-        </div>
-      </div>
-      <div className="s-header__nav">
-        <div className="h-container">
-          <NavMenu categories={CATEGORIES} shops={shops.map((s) => ({ slug: s.slug, title: s.title }))} country={country} part="bar" />
         </div>
       </div>
     </header>

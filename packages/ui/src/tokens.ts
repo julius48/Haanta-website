@@ -11,8 +11,12 @@ export const palette = {
   gradientFrom: "#8b4512",
   gradientTo: "#502404",
   white: "#ffffff",
+  /** Warm off-white: the storefront page background (quieter than pure white, never yellow). */
+  ivory: "#fbf9f5",
   /** Light tan tint for page backgrounds. */
   cream: "#f8f3ec",
+  /** Warm stone: image wells and quiet panels on ivory. */
+  stone: "#efe9e0",
   /** Mid tint for borders and dividers on light surfaces. */
   sand: "#e9dcc9",
   /** Dark neutral for long-form body text. */
@@ -52,6 +56,15 @@ export const colors = {
 export const approvedTextPairs: { name: string; fg: string; bg: string; large?: boolean }[] = [
   { name: "body on white", fg: palette.ink, bg: palette.white },
   { name: "body on cream", fg: palette.ink, bg: palette.cream },
+  { name: "body on ivory", fg: palette.ink, bg: palette.ivory },
+  { name: "body on stone", fg: palette.ink, bg: palette.stone },
+  { name: "brown on ivory", fg: palette.brown, bg: palette.ivory },
+  { name: "muted on ivory", fg: palette.muted, bg: palette.ivory },
+  { name: "muted on stone", fg: palette.muted, bg: palette.stone },
+  { name: "red on ivory", fg: palette.red, bg: palette.ivory },
+  { name: "ivory on brown", fg: palette.ivory, bg: palette.brown },
+  { name: "ivory on ink", fg: palette.ivory, bg: palette.ink },
+  { name: "tan on ink", fg: palette.tan, bg: palette.ink },
   { name: "brown on white", fg: palette.brown, bg: palette.white },
   { name: "brown on cream", fg: palette.brown, bg: palette.cream },
   { name: "brown on tan", fg: palette.brown, bg: palette.tan },

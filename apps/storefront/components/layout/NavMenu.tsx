@@ -37,7 +37,7 @@ function buildPanels(categories: CategoryNode[], shops: ShopLink[]): Panel[] {
   }))
   const shopsPanel: Panel = {
     key: "shops",
-    label: "Curated shops",
+    label: "Edits",
     all: { href: "/shops", label: "All curated shops" },
     links: [...shops.map((s) => ({ href: `/shops/${s.slug}`, label: s.title })), { href: "/shop?ships_from=houston", label: "Ships from the US" }],
     features: [
@@ -88,8 +88,10 @@ function NavBar({ panels }: { panels: Panel[] }) {
                       {p.features.map((f) => (
                         <li key={f.href}>
                           <Link href={f.href} className="s-mega__card">
-                            <ProductImage src={f.image} alt="" sizes="(min-width: 1200px) 30vw, 1px" />
-                            <span>{f.label}</span>
+                            <span className="s-mega__media">
+                              <ProductImage src={f.image} alt="" sizes="(min-width: 1200px) 30vw, 1px" />
+                            </span>
+                            <span className="s-mega__caption">{f.label}</span>
                           </Link>
                         </li>
                       ))}
@@ -107,11 +109,6 @@ function NavBar({ panels }: { panels: Panel[] }) {
         <li className="s-nav__item">
           <Link href="/brands" className="s-nav__trigger">
             Designers
-          </Link>
-        </li>
-        <li className="s-nav__item">
-          <Link href="/journal" className="s-nav__trigger">
-            Journal
           </Link>
         </li>
       </ul>

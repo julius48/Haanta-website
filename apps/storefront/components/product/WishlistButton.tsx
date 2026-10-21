@@ -15,7 +15,7 @@ export function WishlistButton({ productId, title, initialSaved, variant = "icon
   return (
     <button
       type="button"
-      className={variant === "icon" ? "s-heart" : "h-btn h-btn--secondary s-heart-text"}
+      className={variant === "icon" ? "s-heart" : "s-heart-text"}
       aria-pressed={saved}
       aria-label={variant === "icon" ? `Save ${title} to wishlist` : undefined}
       onClick={toggle}

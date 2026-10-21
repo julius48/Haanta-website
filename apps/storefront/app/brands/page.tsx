@@ -22,8 +22,11 @@ export default async function BrandsPage() {
   const letters = [...groups.keys()]
   return (
     <main id="main" className="h-container s-page">
-      <h1>Designers A–Z</h1>
-      <p className="s-lead">Independent designers, each vetted by Haanta for quality and story.</p>
+      <header className="s-head">
+        <p className="s-section__eyebrow">{brands.length} studios</p>
+        <h1 className="s-head__title h-display">Designers A–Z</h1>
+        <p className="s-head__lead">Independent designers, each vetted by Haanta for quality and story.</p>
+      </header>
       {letters.length ? (
         <>
           <nav aria-label="Jump to letter" className="s-az">

@@ -11,10 +11,8 @@ export async function Footer() {
     <footer className="s-footer">
       <div className="h-container">
         <div className="s-footer__top">
-          <div className="s-footer__brand">
-            <Wordmark tone="tan" />
-            <p className="s-footer__tag">{TAGLINE}.</p>
-            <h2 className="s-footer__heading" id="newsletter-heading">
+          <div className="s-footer__news">
+            <h2 className="s-footer__invite h-display" id="newsletter-heading">
               Join the Haanta list
             </h2>
             <p>New designers, restocks and stories from the studios. No spam.</p>
@@ -22,7 +20,7 @@ export async function Footer() {
           </div>
           <nav aria-labelledby="footer-shops" className="s-footer__col">
             <h2 id="footer-shops" className="s-footer__heading">
-              Shops
+              Shop
             </h2>
             <ul>
               {shops.map((s) => (
@@ -37,7 +35,7 @@ export async function Footer() {
           </nav>
           <nav aria-labelledby="footer-help" className="s-footer__col">
             <h2 id="footer-help" className="s-footer__heading">
-              Help
+              Client care
             </h2>
             <ul>
               <li>
@@ -71,9 +69,6 @@ export async function Footer() {
               <li>
                 <Link href="/help/returns#policies">Policies</Link>
               </li>
-            </ul>
-            <h2 className="s-footer__heading">Follow us</h2>
-            <ul className="s-footer__social">
               {SOCIAL.map((s) => (
                 <li key={s.name}>
                   <a href={s.href} rel="noopener noreferrer" target="_blank">
@@ -85,9 +80,13 @@ export async function Footer() {
             </ul>
           </nav>
         </div>
-        <p className="s-footer__legal">
-          © {year} Haanta. Prices include duties and taxes for the US and Canada.
-        </p>
+        <div className="s-footer__mark" aria-hidden="true">
+          <Wordmark tone="tan" />
+        </div>
+        <div className="s-footer__legal">
+          <p>© {year} Haanta. Prices include duties and taxes for the US and Canada.</p>
+          <p>{TAGLINE}.</p>
+        </div>
       </div>
     </footer>
   )

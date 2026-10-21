@@ -6,6 +6,7 @@ import { Price } from "@haanta/ui"
 import { addToCartAction } from "@/app/actions/cart"
 import { validateMeasurements, validateOptionalMeasurements, MEASUREMENT_FIELDS, isMeasurementKey, type MeasurementKey } from "@/lib/measurements"
 import { toMinor } from "@/lib/money"
+import { sortOptionValues } from "@/lib/option-order"
 import { track } from "@/lib/analytics"
 import type { RequiredMeasurement, StoreProduct, StoreVariant } from "@/lib/types"
 
@@ -201,7 +202,7 @@ export function AddToCartForm(p: AddToCartProps) {
             {selected[o.id] ? <span className="s-muted">: {selected[o.id]}</span> : null}
           </legend>
           <div className="s-options__list">
-            {(o.values ?? []).map((v) => {
+            {sortOptionValues(o.title, o.values ?? []).map((v) => {
               const id = `${uid}-${o.id}-${v.id}`
               const combos = matching(o.id, o.title, v.value)
               const ok = combos.some(inStock)

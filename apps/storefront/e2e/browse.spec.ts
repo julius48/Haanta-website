@@ -54,6 +54,8 @@ test("quick view adds to cart from the listing", async ({ page }) => {
 
 test("search returns results and the search box is labelled", async ({ page }) => {
   await page.goto("/")
+  await page.getByTestId("search-toggle").click()
+  await expect(page.getByTestId("search-input")).toBeFocused()
   await page.getByTestId("search-input").fill("a")
   await page.getByTestId("search-input").press("Enter")
   await expect(page).toHaveURL(/\/search\?q=a/)
