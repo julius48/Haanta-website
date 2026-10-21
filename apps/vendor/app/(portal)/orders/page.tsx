@@ -17,9 +17,12 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <div className="v-page-head">
-        <h1>Orders</h1>
+        <div>
+          <p className="v-eyebrow">Fulfilment</p>
+          <h1>Orders</h1>
+          <p className="v-page-head__lead">Ship every order to the Haanta hub by its ship-by date. Haanta handles delivery to the buyer.</p>
+        </div>
       </div>
-      <p className="v-muted">Ship every order to the Haanta hub by its ship-by date. Haanta handles delivery to the buyer.</p>
       <nav aria-label="Filter orders by status">
         <ul className="v-tabs">
           {ORDER_TABS.map((t) => (
@@ -37,7 +40,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
             const late = isOrderLate(o)
             const units = o.lines.reduce((n, l) => n + l.quantity, 0)
             return (
-              <li key={o.id}>
+              <li key={o.id} className={late ? "v-order v-order--late" : "v-order"}>
                 <div className="v-item">
                   <Link className="v-item__title" href={`/orders/${o.id}`}>
                     Order #{o.display_id}

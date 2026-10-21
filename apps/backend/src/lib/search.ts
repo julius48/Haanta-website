@@ -404,6 +404,9 @@ let pending: ReturnType<typeof setTimeout> | null = null
  * vendor saving many variants) collapses into one rebuild a few seconds after the last event.
  */
 export function scheduleSearchRefresh(container: MedusaContainer, delayMs = 5_000): void {
+  // Bulk scripts (e.g. a remote catalog import) set this: their in-process index is thrown away anyway,
+  // and rebuilding the whole catalog after every product dominates the run time over a remote database.
+  if (process.env.SEARCH_REFRESH === "off") return
   if (pending) clearTimeout(pending)
   pending = setTimeout(() => {
     pending = null

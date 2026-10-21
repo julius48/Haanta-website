@@ -48,9 +48,13 @@ export async function previewPrices(req: MedusaRequest, vendorId: string, produc
 }
 
 export function listingView(l: Record<string, unknown>) {
+  // First photo of the latest version (pending edits first), for list thumbnails in the portal.
+  const images = (s: unknown) => ((s as { images?: unknown } | null)?.images as string[] | undefined) ?? []
+  const thumbnail = images(l.pending_snapshot)[0] ?? images(l.approved_snapshot)[0] ?? null
   return {
     id: l.id,
     title: l.title,
+    thumbnail,
     status: l.status,
     product_id: l.product_id,
     is_live: !!l.approved_snapshot,

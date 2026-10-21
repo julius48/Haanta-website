@@ -694,16 +694,21 @@ a.v-item__title {
   display: none;
 }
 
-/* ================================================================ Haanta luxe theme
- * Same visual language as the storefront, tuned for a working tool: ivory page, white panels with
- * hairlines, ink type, small-caps labels, ink buttons. No radii. Brown stays for the wordmark and charts.
+/* ================================================================ Haanta partner theme
+ * The storefront's language, warmed up for a daily tool: an espresso sidebar with tan wordmark and line
+ * icons, an ivory workspace, white panels with hairlines, display-type figures, softly tinted status
+ * chips and ink buttons. Square corners throughout.
  */
 :root {
   --v-page: var(--haanta-ivory);
   --v-panel: var(--haanta-white);
   --v-ink: var(--haanta-ink);
-  --v-rule: color-mix(in srgb, var(--haanta-ink) 11%, transparent);
-  --v-rule-strong: color-mix(in srgb, var(--haanta-ink) 24%, transparent);
+  --v-espresso: color-mix(in srgb, var(--haanta-brown) 78%, black);
+  --v-rule: color-mix(in srgb, var(--haanta-ink) 10%, transparent);
+  --v-rule-strong: color-mix(in srgb, var(--haanta-ink) 22%, transparent);
+  --v-on-dark: color-mix(in srgb, var(--haanta-ivory) 72%, transparent);
+  --v-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --v-shadow: 0 1px 2px color-mix(in srgb, var(--haanta-ink) 5%, transparent), 0 10px 30px -12px color-mix(in srgb, var(--haanta-ink) 14%, transparent);
   --color-border: var(--v-rule);
 }
 
@@ -720,46 +725,97 @@ h3 {
   color: var(--v-ink);
 }
 
-h1 {
-  font-size: clamp(26px, 2.6vw, 34px);
-  font-weight: 300;
-  letter-spacing: -0.01em;
-}
-
 a {
   color: var(--v-ink);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
-/* Small-caps label style shared by card titles, tabs, nav, table heads, legends. */
+/* Page titles in display type, with a small-caps eyebrow above. */
+.v-main h1 {
+  margin: 0;
+  font-family: var(--font-display-stack);
+  font-size: clamp(28px, 2.8vw, 40px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.v-eyebrow {
+  margin: 0 0 10px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.v-page-head {
+  align-items: flex-end;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--v-rule);
+}
+
+.v-page-head__lead {
+  max-width: 60ch;
+  margin: 12px 0 0;
+  font-weight: 300;
+  color: var(--color-text-muted);
+}
+
+/* Small-caps labels shared across the tool. */
 .v-card h2,
-.v-nav-link,
 .v-tab,
 .v-table thead th,
 .v-stat__label,
 .v-brand__label,
-.v-table caption {
+.v-table caption,
+.v-studio__label {
   font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
-/* Shell: an ivory top bar with a hairline; brown wordmark. */
-.v-topbar,
-.v-auth__head {
-  background: color-mix(in srgb, var(--v-page) 94%, transparent);
-  backdrop-filter: blur(14px);
-  color: var(--v-ink);
-  border-bottom: 1px solid var(--v-rule);
+/* ---------------------------------------------------------------- shell */
+.v-shell {
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .v-shell {
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+}
+
+.v-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--v-espresso);
+  color: var(--haanta-ivory);
+}
+
+.v-topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 60px;
+  padding-inline: var(--layout-margin-mobile);
 }
 
 .v-brand,
 .v-brand:hover {
-  color: var(--color-brand);
-  align-items: center;
-  gap: 14px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  color: var(--haanta-tan);
+  text-decoration: none;
 }
 
 .v-brand .h-wordmark {
@@ -767,66 +823,317 @@ a {
 }
 
 .v-brand__label {
-  color: var(--color-text-muted);
-  padding-left: 14px;
-  border-left: 1px solid var(--v-rule-strong);
+  color: var(--v-on-dark);
+  font-size: 9.5px;
+  letter-spacing: 0.26em;
 }
 
-.v-topbar :focus-visible {
-  outline-color: var(--color-focus);
+.v-topbar :focus-visible,
+.v-sidenav :focus-visible {
+  outline-color: var(--haanta-tan);
 }
 
 .v-menu-toggle {
-  border-color: var(--v-rule-strong);
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--haanta-tan) 50%, transparent);
   border-radius: 0;
-  color: var(--v-ink);
+  background: transparent;
+  color: var(--haanta-ivory);
   font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
+/* Sidebar: espresso, tan wordmark, line icons; a tan rule marks the current page. */
 .v-sidenav {
-  background: transparent;
+  display: none;
+  background: var(--v-espresso);
+  color: var(--v-on-dark);
+  border: 0;
+}
+
+.v-sidenav[data-open="true"] {
+  display: block;
+  padding-bottom: 16px;
+}
+
+.v-sidenav__brand {
+  display: none;
 }
 
 .v-nav-list {
-  padding-top: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
 }
 
 .v-nav-link {
-  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 46px;
   padding: 8px 24px;
-  color: var(--color-text-muted);
-  border-left: 1px solid transparent;
+  border-left: 2px solid transparent;
+  color: var(--v-on-dark);
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+
+.v-nav-link svg {
+  flex: none;
+  opacity: 0.8;
 }
 
 .v-nav-link:hover {
-  background: transparent;
-  color: var(--v-ink);
+  background: color-mix(in srgb, var(--haanta-ivory) 5%, transparent);
+  color: var(--haanta-ivory);
 }
 
 .v-nav-link[aria-current="page"] {
-  color: var(--v-ink);
+  background: color-mix(in srgb, var(--haanta-ivory) 8%, transparent);
+  border-left-color: var(--haanta-tan);
+  color: var(--haanta-ivory);
   font-weight: 500;
-  background: transparent;
-  border-left-color: var(--v-ink);
 }
 
-.v-main {
-  padding-top: 40px;
+.v-nav-link[aria-current="page"] svg {
+  color: var(--haanta-tan);
+  opacity: 1;
+}
+
+.v-sidenav__foot {
+  margin: 16px 24px 0;
+  padding-top: 20px;
+  border-top: 1px solid color-mix(in srgb, var(--haanta-tan) 18%, transparent);
+}
+
+.v-studio p {
+  margin: 0;
+}
+
+.v-studio__label {
+  color: color-mix(in srgb, var(--haanta-tan) 85%, transparent);
+  font-size: 9.5px;
+}
+
+.v-studio__name {
+  margin-top: 6px !important;
+  color: var(--haanta-ivory);
+  font-family: var(--font-display-stack);
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.v-studio__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--v-on-dark);
+  font-size: 12.5px;
+  text-decoration: underline;
+}
+
+.v-studio__link:hover {
+  color: var(--haanta-ivory);
 }
 
 @media (min-width: 1024px) {
-  .v-layout {
-    grid-template-columns: 220px minmax(0, 1fr);
+  .v-topbar {
+    display: none;
   }
-  .v-main {
-    padding-left: 24px;
+  .v-sidenav,
+  .v-sidenav[data-open="false"] {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 28px;
+  }
+  .v-sidenav__brand {
+    display: block;
+    padding: 28px 24px 24px;
+  }
+  .v-sidenav__brand .v-brand {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .v-sidenav__brand .h-wordmark {
+    font-size: 30px;
+  }
+  .v-sidenav__foot {
+    margin-top: auto;
   }
 }
 
-/* Panels */
+.v-body {
+  min-width: 0;
+}
+
+.v-main {
+  padding: 32px 0 80px;
+}
+
+.v-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline: var(--layout-margin-mobile);
+}
+
+@media (min-width: 1024px) {
+  .v-main {
+    padding-top: 48px;
+  }
+  .v-container {
+    padding-inline: clamp(32px, 4vw, 56px);
+  }
+}
+
+.v-banner {
+  background: var(--haanta-stone);
+  border-bottom: 1px solid var(--v-rule);
+  padding: 14px 0;
+  font-size: 14px;
+}
+
+.v-banner .h-container {
+  max-width: 1240px;
+}
+
+.v-banner strong {
+  color: var(--v-ink);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- dashboard */
+.v-welcome {
+  position: relative;
+  display: grid;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: clamp(28px, 4vw, 48px);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--color-gradient-marketing);
+  color: var(--haanta-ivory);
+}
+
+.v-welcome::after {
+  /* A faint tan arc, echoing the wordmark's accents. */
+  content: "";
+  position: absolute;
+  right: -120px;
+  top: -160px;
+  z-index: -1;
+  width: 420px;
+  height: 420px;
+  border: 1px solid color-mix(in srgb, var(--haanta-tan) 30%, transparent);
+  border-radius: 50%;
+}
+
+@media (min-width: 900px) {
+  .v-welcome {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+.v-welcome .v-eyebrow {
+  color: var(--haanta-tan);
+}
+
+.v-main .v-welcome__title {
+  color: var(--haanta-ivory);
+  font-size: clamp(28px, 3.4vw, 46px);
+}
+
+.v-welcome__lead {
+  max-width: 52ch;
+  margin: 14px 0 0;
+  font-weight: 300;
+  color: color-mix(in srgb, var(--haanta-ivory) 86%, transparent);
+}
+
+.v-welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.v-btn-light {
+  background: var(--haanta-ivory);
+  border-color: var(--haanta-ivory);
+  color: var(--v-ink);
+}
+
+.v-btn-light:hover {
+  background: var(--haanta-tan);
+  border-color: var(--haanta-tan);
+  color: var(--v-ink);
+}
+
+.v-btn-ghost-light {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--haanta-ivory) 55%, transparent);
+  color: var(--haanta-ivory);
+}
+
+.v-btn-ghost-light:hover {
+  border-color: var(--haanta-ivory);
+  color: var(--haanta-ivory);
+}
+
+.v-kpis {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .v-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .v-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.v-dash {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 1100px) {
+  .v-dash {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.v-dash .v-card {
+  margin: 0;
+}
+
+.v-attention__late {
+  color: var(--color-danger);
+}
+
+.v-attention__low {
+  color: var(--color-warning);
+}
+
+/* ---------------------------------------------------------------- panels */
 .v-card,
 .v-stat,
 .v-table-wrap,
@@ -837,9 +1144,14 @@ a {
   border-radius: 0;
 }
 
+.v-card {
+  margin-bottom: 24px;
+  box-shadow: var(--v-shadow);
+}
+
 @media (min-width: 768px) {
   .v-card {
-    padding: 28px;
+    padding: 28px 32px;
   }
 }
 
@@ -847,27 +1159,96 @@ a {
   margin-bottom: 20px;
 }
 
+.v-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 20px;
+}
+
+.v-card__head h2 {
+  margin: 0;
+}
+
+.v-card__meta {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--color-text-muted);
+}
+
 .v-stat {
-  padding: 20px;
+  position: relative;
+  padding: 22px 24px;
+  box-shadow: var(--v-shadow);
+}
+
+.v-stat::before {
+  /* A short tan rule above each figure. */
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: 0;
+  width: 28px;
+  height: 2px;
+  background: var(--haanta-tan);
+}
+
+.v-stat--alert::before {
+  background: var(--color-danger);
 }
 
 .v-stat__label {
-  letter-spacing: 0.16em;
+  margin: 0;
+  color: var(--color-text-muted);
 }
 
 .v-stat__value {
-  margin-top: 6px;
+  margin: 12px 0 0;
   color: var(--v-ink);
-  font-size: clamp(26px, 2.4vw, 34px);
+  font-family: var(--font-display-stack);
+  font-size: clamp(28px, 2.6vw, 38px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.v-stat__note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
   font-weight: 300;
-  letter-spacing: -0.01em;
+  color: var(--color-text-muted);
 }
 
-.v-page-head {
-  margin-bottom: 32px;
+.v-stat--alert .v-stat__note {
+  color: var(--color-danger);
+  font-weight: 500;
 }
 
-/* Buttons: ink, small caps, square. */
+.v-empty {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-height: 160px;
+  padding: 24px;
+  text-align: center;
+  background: color-mix(in srgb, var(--haanta-stone) 45%, transparent);
+}
+
+.v-empty p {
+  margin: 0;
+}
+
+.v-empty__title {
+  font-family: var(--font-display-stack);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------- buttons */
 .h-btn {
   min-height: 46px;
   padding: 0 24px;
@@ -876,6 +1257,7 @@ a {
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
+  transition: background 0.25s var(--v-ease), border-color 0.25s var(--v-ease), color 0.25s var(--v-ease);
 }
 
 .h-btn--primary {
@@ -905,7 +1287,7 @@ a {
   text-underline-offset: 3px;
 }
 
-/* Forms */
+/* ---------------------------------------------------------------- forms */
 .v-label,
 .v-fieldset legend {
   font-size: 10.5px;
@@ -923,6 +1305,13 @@ a {
   border-radius: 0;
   background: var(--v-panel);
   padding-inline: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.v-input:hover,
+.v-select:hover,
+.v-textarea:hover {
+  border-color: color-mix(in srgb, var(--haanta-ink) 40%, transparent);
 }
 
 .v-input:focus,
@@ -937,45 +1326,49 @@ a {
   accent-color: var(--v-ink);
 }
 
-/* Alerts and banners */
+.v-sticky-actions {
+  background: color-mix(in srgb, var(--v-page) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+/* ---------------------------------------------------------------- alerts */
 .v-alert {
   border-radius: 0;
   border-left-width: 2px;
   background: var(--v-panel);
 }
 
-.v-banner {
-  background: var(--haanta-stone);
-  border-bottom-color: var(--v-rule);
-  font-size: 14px;
-}
-
-.v-banner strong {
-  color: var(--v-ink);
-  font-weight: 500;
-}
-
-/* Chips and tabs */
+/* ---------------------------------------------------------------- chips and tabs */
 .v-chip {
-  padding: 3px 8px;
+  padding: 4px 9px;
+  border: 0;
   border-radius: 0;
-  background: transparent;
   font-size: 9.5px;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  background: color-mix(in srgb, currentColor 10%, var(--v-panel));
+}
+
+.v-chip--draft {
+  color: var(--color-text-muted);
 }
 
 .v-tabs {
-  gap: 24px;
-  margin-bottom: 8px;
+  gap: 28px;
+  margin-bottom: 16px;
   border-bottom-color: var(--v-rule);
 }
 
 .v-tab {
-  padding: 8px 0;
+  padding: 10px 0;
   color: var(--color-text-muted);
   border-bottom-width: 1px;
+  transition: color 0.2s;
+}
+
+.v-tab:hover {
+  color: var(--v-ink);
 }
 
 .v-tab[aria-current="page"] {
@@ -984,7 +1377,7 @@ a {
   border-bottom-color: var(--v-ink);
 }
 
-/* Lists and tables */
+/* ---------------------------------------------------------------- lists and tables */
 .v-list > li {
   padding: 16px 0;
 }
@@ -1001,6 +1394,48 @@ a.v-item__title:hover {
   color: var(--color-brand);
 }
 
+/* Lists that are also panels: pad the rows, not the panel; rows highlight on hover. */
+.v-list.v-card {
+  padding: 0;
+}
+
+.v-list.v-card > li {
+  padding-inline: 20px;
+  transition: background 0.2s;
+}
+
+.v-list.v-card > li:hover {
+  background: color-mix(in srgb, var(--haanta-stone) 35%, transparent);
+}
+
+@media (min-width: 768px) {
+  .v-list.v-card > li {
+    padding-inline: 28px;
+  }
+}
+
+/* Product rows: photo, then title, chips and notes. */
+.v-list.v-card > .v-row-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+}
+
+.v-row-item__thumb img,
+.v-row-item__ph {
+  display: block;
+  width: 56px;
+  height: 74px;
+  object-fit: cover;
+  background: var(--haanta-stone);
+}
+
+/* Order rows: a red rule marks late orders. */
+.v-order--late {
+  box-shadow: inset 2px 0 0 var(--color-danger);
+}
+
 .v-table {
   font-size: 14px;
 }
@@ -1011,7 +1446,7 @@ a.v-item__title:hover {
 
 .v-table th,
 .v-table td {
-  padding: 12px 16px;
+  padding: 13px 16px;
   border-bottom-color: var(--v-rule);
 }
 
@@ -1024,19 +1459,48 @@ a.v-item__title:hover {
   font-weight: 400;
 }
 
-/* Chart: brand brown bars with a softer hover. */
+.v-table tbody tr:hover {
+  background: color-mix(in srgb, var(--haanta-stone) 30%, transparent);
+}
+
+.v-card .v-table-wrap {
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------- chart */
 .v-chart__bar {
-  fill: color-mix(in srgb, var(--color-brand) 88%, transparent);
+  fill: color-mix(in srgb, var(--color-brand) 85%, transparent);
+  transition: fill 0.2s;
+}
+
+.v-chart__bar:hover {
+  fill: var(--haanta-tan);
 }
 
 .v-chart__label {
   font-size: 11px;
 }
 
+/* ---------------------------------------------------------------- misc */
 .v-codes,
 .v-secret {
   border-radius: 0;
   background: var(--haanta-stone);
+}
+
+/* ---------------------------------------------------------------- sign-in pages (ivory, brown wordmark) */
+.v-auth__head {
+  background: color-mix(in srgb, var(--v-page) 94%, transparent);
+  border-bottom: 1px solid var(--v-rule);
+}
+
+.v-auth__head .v-brand,
+.v-auth__head .v-brand:hover {
+  color: var(--color-brand);
+}
+
+.v-auth__head .v-brand__label {
+  color: var(--color-text-muted);
 }
 
 .v-auth__body {
@@ -1050,17 +1514,33 @@ a.v-item__title:hover {
   text-transform: uppercase;
 }
 
-/* Lists that are also panels: pad the rows, not the panel (rows keep full-width hairlines). */
-.v-list.v-card {
-  padding: 0;
+.v-auth .v-card {
+  box-shadow: var(--v-shadow);
 }
 
-.v-list.v-card > li {
-  padding-inline: 20px;
+@media (min-width: 1024px) {
+  .v-sidenav .v-nav-list {
+    position: static;
+    padding-top: 8px;
+  }
 }
 
-@media (min-width: 768px) {
-  .v-list.v-card > li {
-    padding-inline: 28px;
+/* Phones: figures two-up and a little tighter. */
+@media (max-width: 639px) {
+  .v-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .v-stat {
+    padding: 18px 16px;
+  }
+  .v-stat::before {
+    left: 16px;
+  }
+  .v-stat__value {
+    font-size: 24px;
+  }
+  .v-stat__note {
+    font-size: 11.5px;
   }
 }

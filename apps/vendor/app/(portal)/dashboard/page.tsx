@@ -16,16 +16,33 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams
   const [me, analytics, earnings] = await Promise.all([getMe(), vendorGet<Analytics>(`/vendor/analytics?days=${DAYS}`), vendorGet<Earnings>("/vendor/earnings")])
   const b = earnings.balance
+  const firstName = me?.user.name.split(" ")[0]
+  const salesTotal = analytics.sales_by_day.reduce((n, d) => n + d.amount_minor, 0)
+  const attention = analytics.late_orders.length + analytics.low_stock.length
   return (
     <>
-      <div className="v-page-head">
+      <section className="v-welcome" aria-labelledby="welcome-h">
         <div>
-          <h1>Hello{me ? `, ${me.user.name.split(" ")[0]}` : ""}</h1>
-          <p className="v-muted" style={{ margin: 0 }}>
-            {me?.vendor.name} · last {DAYS} days
+          <p className="v-eyebrow">{me?.vendor.name}</p>
+          <h1 id="welcome-h" className="v-welcome__title">
+            Welcome back{firstName ? `, ${firstName}` : ""}
+          </h1>
+          <p className="v-welcome__lead">
+            {analytics.open_orders
+              ? `You have ${analytics.open_orders} open order${analytics.open_orders === 1 ? "" : "s"} to prepare for the Haanta hub.`
+              : "No open orders right now. A good moment to add new pieces."}
           </p>
         </div>
-      </div>
+        <div className="v-welcome__actions">
+          <Link href="/orders" className="h-btn v-btn-light">
+            View orders
+          </Link>
+          <Link href="/products/new" className="h-btn v-btn-ghost-light">
+            Add a product
+          </Link>
+        </div>
+      </section>
+
       {sp.verified ? <Alert tone="success" title="Email verified">Thank you. Your account is all set.</Alert> : null}
       {sp.blocked === "pending" ? (
         <Alert tone="warning" title="Not available yet">
@@ -38,75 +55,65 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </Alert>
       ) : null}
 
-      <section aria-labelledby="balance-h" className="v-card">
-        <h2 id="balance-h">Your balance</h2>
-        <div className="v-grid v-grid--3">
-          <Stat label="Pending (awaiting delivery and return window)" value={formatMinor(b.pending_minor, "USD")} />
-          <Stat label="Payable (next payout)" value={formatMinor(b.payable_minor, "USD")} />
-          <Stat label="Paid to date" value={formatMinor(b.paid_minor, "USD")} />
-        </div>
-        <p style={{ marginTop: "var(--space-4)" }}>
-          <Link href="/earnings">See all earnings and statements</Link>
-        </p>
+      <section aria-labelledby="balance-h" className="v-kpis">
+        <h2 id="balance-h" className="h-sr-only">
+          Your balance and orders
+        </h2>
+        <Stat label="Open orders" value={String(analytics.open_orders)} note={analytics.late_orders.length ? `${analytics.late_orders.length} late` : "None late"} tone={analytics.late_orders.length ? "alert" : undefined} testId="open-orders" />
+        <Stat label="Pending" value={formatMinor(b.pending_minor, "USD")} note="Awaiting delivery and the return window" />
+        <Stat label="Payable" value={formatMinor(b.payable_minor, "USD")} note="In your next payout" />
+        <Stat label="Paid to date" value={formatMinor(b.paid_minor, "USD")} note={<Link href="/earnings">Earnings and statements</Link>} />
       </section>
 
-      <div className="v-grid v-grid--2">
-        <section aria-labelledby="orders-h" className="v-card">
-          <h2 id="orders-h">Orders to fulfil</h2>
-          <p>
-            <strong className="v-stat__value" data-testid="open-orders">
-              {analytics.open_orders}
-            </strong>{" "}
-            open order{analytics.open_orders === 1 ? "" : "s"}
-          </p>
-          {analytics.late_orders.length ? (
-            <>
-              <h3 style={{ color: "var(--color-danger)" }}>Late — ship these first</h3>
-              <ul className="v-list">
-                {analytics.late_orders.map((o) => (
-                  <li key={o.id} className="v-item">
-                    <Link className="v-item__title" href={`/orders/${o.id}`}>
-                      Order #{o.display_id}
-                    </Link>
-                    <span className="v-small">
-                      {ORDER_STATUS_LABEL[o.status as VendorOrderStatus] ?? o.status} · ship by {formatDate(o.ship_by)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p className="v-muted">No late orders. </p>
-          )}
-          <Link href="/orders" className="h-btn h-btn--secondary">
-            Go to orders
-          </Link>
+      <div className="v-dash">
+        <section aria-labelledby="sales-h" className="v-card v-dash__sales">
+          <div className="v-card__head">
+            <h2 id="sales-h">Sales</h2>
+            <p className="v-card__meta">
+              {formatMinor(salesTotal, "USD")} · last {DAYS} days
+            </p>
+          </div>
+          <SalesChart data={fillDays(analytics.sales_by_day, DAYS)} />
         </section>
 
-        <section aria-labelledby="stock-h" className="v-card">
-          <h2 id="stock-h">Low stock</h2>
-          {analytics.low_stock.length ? (
-            <ul className="v-list">
+        <section aria-labelledby="attention-h" className="v-card v-dash__attention">
+          <div className="v-card__head">
+            <h2 id="attention-h">Needs attention</h2>
+            <p className="v-card__meta">{attention ? `${attention} item${attention === 1 ? "" : "s"}` : "All clear"}</p>
+          </div>
+          {attention ? (
+            <ul className="v-list v-attention">
+              {analytics.late_orders.map((o) => (
+                <li key={o.id} className="v-item">
+                  <Link className="v-item__title" href={`/orders/${o.id}`}>
+                    Order #{o.display_id}
+                  </Link>
+                  <span className="v-small v-attention__late">
+                    Late · {ORDER_STATUS_LABEL[o.status as VendorOrderStatus] ?? o.status} · ship by {formatDate(o.ship_by)}
+                  </span>
+                </li>
+              ))}
               {analytics.low_stock.map((s) => (
                 <li key={s.variant_id} className="v-item">
                   <span>{s.title}</span>
-                  <strong style={{ color: s.available <= 0 ? "var(--color-danger)" : "var(--color-warning)" }}>{s.available <= 0 ? "Sold out" : `${s.available} left`}</strong>
+                  <span className={`v-small ${s.available <= 0 ? "v-attention__late" : "v-attention__low"}`}>{s.available <= 0 ? "Sold out" : `${s.available} left`}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="v-muted">All tracked products have enough stock.</p>
+            <div className="v-empty">
+              <p className="v-empty__title">Nothing needs you right now</p>
+              <p className="v-muted v-small">No late orders, and every tracked piece has stock.</p>
+            </div>
           )}
         </section>
       </div>
 
-      <section aria-labelledby="sales-h" className="v-card">
-        <h2 id="sales-h">Sales</h2>
-        <SalesChart data={fillDays(analytics.sales_by_day, DAYS)} />
-      </section>
-
       <section aria-labelledby="best-h" className="v-card">
-        <h2 id="best-h">Best sellers</h2>
+        <div className="v-card__head">
+          <h2 id="best-h">Best sellers</h2>
+          <p className="v-card__meta">Last {DAYS} days</p>
+        </div>
         {analytics.best_sellers.length ? (
           <div className="v-table-wrap" tabIndex={0} role="region" aria-labelledby="best-h">
             <table className="v-table">
@@ -133,10 +140,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </table>
           </div>
         ) : (
-          <p className="v-muted">No sales yet. Once your products are live, your best sellers show here.</p>
+          <div className="v-empty">
+            <p className="v-empty__title">No sales yet</p>
+            <p className="v-muted v-small">Once your products are live, your best sellers show here.</p>
+          </div>
         )}
       </section>
     </>
   )
 }
-

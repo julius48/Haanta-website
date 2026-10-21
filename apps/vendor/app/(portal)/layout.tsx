@@ -4,6 +4,8 @@ import { PortalFrame } from "@/components/portal-nav"
 import { requireVendor } from "@/lib/server/session"
 import type { VendorStatus } from "@/lib/types"
 
+const STOREFRONT_URL = process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "http://localhost:3000"
+
 function StatusBanner({ status }: { status: VendorStatus }) {
   if (status === "active") return null
   const text: Record<Exclude<VendorStatus, "active">, { title: string; body: string }> = {
@@ -30,12 +32,21 @@ export default async function PortalLayout({ children }: { children: React.React
     <PortalFrame
       brand={
         <Link href="/dashboard" className="v-brand">
-          <Wordmark tone="brown" />
+          <Wordmark tone="tan" />
           <span className="v-brand__label">Partner Portal</span>
           <span className="h-sr-only">, {me.vendor.name}</span>
         </Link>
       }
       banner={<StatusBanner status={me.vendor.status} />}
+      footer={
+        <div className="v-studio">
+          <p className="v-studio__label">Your studio</p>
+          <p className="v-studio__name">{me.vendor.name}</p>
+          <a className="v-studio__link" href={`${STOREFRONT_URL}/brands/${me.vendor.slug}`} target="_blank" rel="noopener noreferrer">
+            View your shop<span className="h-sr-only"> (opens in a new tab)</span>
+          </a>
+        </div>
+      }
     >
       {children}
     </PortalFrame>

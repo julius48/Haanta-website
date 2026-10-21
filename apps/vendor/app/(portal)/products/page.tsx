@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
 import { ListingChips } from "@/components/chips"
 import { Alert } from "@/components/fields"
@@ -18,7 +19,10 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <div className="v-page-head">
-        <h1>Products</h1>
+        <div>
+          <p className="v-eyebrow">Your collection</p>
+          <h1>Products</h1>
+        </div>
         {canEdit ? (
           <Link href="/products/new" className="h-btn h-btn--primary" data-testid="new-product">
             Add a product
@@ -43,23 +47,28 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       {data.products.length ? (
         <ul className="v-list v-card" data-testid="product-list">
           {data.products.map((p) => (
-            <li key={p.id}>
-              <div className="v-item">
-                <Link className="v-item__title" href={`/products/${p.id}`}>
-                  {p.title}
-                </Link>
-                <ListingChips product={p} />
-              </div>
-              <p className="v-small v-muted" style={{ margin: "var(--space-1) 0 0" }}>
-                Updated {formatDate(p.updated_at)}
-                {p.weight_missing ? " · Add weights so shipping can be quoted" : ""}
-                {p.size_chart_missing ? " · No size chart" : ""}
-              </p>
-              {p.review_note && (p.status === "changes_requested" || p.status === "draft") ? (
-                <p className="v-alert v-alert--warning v-small" style={{ margin: "var(--space-2) 0 0" }}>
-                  <strong>Haanta&apos;s note:</strong> {p.review_note}
+            <li key={p.id} className="v-row-item">
+              <span className="v-row-item__thumb">
+                {p.thumbnail ? <Image src={p.thumbnail} alt="" width={56} height={74} unoptimized /> : <span className="v-row-item__ph" aria-hidden="true" />}
+              </span>
+              <div className="v-row-item__body">
+                <div className="v-item">
+                  <Link className="v-item__title" href={`/products/${p.id}`}>
+                    {p.title}
+                  </Link>
+                  <ListingChips product={p} />
+                </div>
+                <p className="v-small v-muted" style={{ margin: "var(--space-1) 0 0" }}>
+                  Updated {formatDate(p.updated_at)}
+                  {p.weight_missing ? " · Add weights so shipping can be quoted" : ""}
+                  {p.size_chart_missing ? " · No size chart" : ""}
                 </p>
-              ) : null}
+                {p.review_note && (p.status === "changes_requested" || p.status === "draft") ? (
+                  <p className="v-alert v-alert--warning v-small" style={{ margin: "var(--space-2) 0 0" }}>
+                    <strong>Haanta&apos;s note:</strong> {p.review_note}
+                  </p>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>

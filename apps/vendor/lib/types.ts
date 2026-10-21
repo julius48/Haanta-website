@@ -14,6 +14,8 @@ export type ListingStatus = "draft" | "in_review" | "live" | "changes_requested"
 export interface ListingView {
   id: string
   title: string
+  /** First product photo, if any. */
+  thumbnail: string | null
   status: ListingStatus
   product_id: string | null
   is_live: boolean
